@@ -2,9 +2,15 @@
 import React, { useState, useEffect } from 'react';
 import { HashRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { translations } from './translations';
-import { Language } from './types';
+import { Language, TranslationContent } from './types';
 
-const Navbar = ({ t, currentLang, setLang }) => (
+interface NavbarProps {
+  t: TranslationContent;
+  currentLang: Language;
+  setLang: (lang: Language) => void;
+}
+
+const Navbar: React.FC<NavbarProps> = ({ t, currentLang, setLang }) => (
   <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200">
     <div className="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
       <Link to="/" className="text-2xl font-black text-blue-600 tracking-tighter">READER</Link>
@@ -17,7 +23,7 @@ const Navbar = ({ t, currentLang, setLang }) => (
         {Object.values(Language).map((l) => (
           <button
             key={l}
-            onClick={() => setLang(l)}
+            onClick={() => setLang(l as Language)}
             className={`px-3 py-1.5 rounded-lg text-xs font-black transition-all ${
               currentLang === l ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'
             }`}
@@ -30,7 +36,11 @@ const Navbar = ({ t, currentLang, setLang }) => (
   </nav>
 );
 
-const Home = ({ t }) => (
+interface HomeProps {
+  t: TranslationContent;
+}
+
+const Home: React.FC<HomeProps> = ({ t }) => (
   <div className="animate-in fade-in duration-700">
     <header className="py-24 text-center">
       <h1 className="text-6xl md:text-8xl font-black text-slate-900 mb-8 tracking-tight">
@@ -45,7 +55,7 @@ const Home = ({ t }) => (
     </header>
 
     <section className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-8 py-20">
-      {t.features.items.map((f, i) => (
+      {t.features.items.map((f, i: number) => (
         <div key={i} className="bg-white p-10 rounded-[32px] border border-slate-200 hover:shadow-xl transition-all group">
           <div className="text-4xl mb-6">{f.icon}</div>
           <h3 className="text-2xl font-bold mb-4">{f.title}</h3>
@@ -56,7 +66,7 @@ const Home = ({ t }) => (
   </div>
 );
 
-const App = () => {
+const App: React.FC = () => {
   const [lang, setLang] = useState<Language>(() => 
     (localStorage.getItem('lang') as Language) || Language.EN
   );
