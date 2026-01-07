@@ -7,7 +7,7 @@ export const translations: Translations = {
     hero: {
       title: 'Build Faster, Reach Further',
       subtitle: 'A modern, multilingual static site template powered by React and Tailwind CSS. Perfect for global reach.',
-      cta: 'Get Started'
+      cta: 'Vision Span'
     },
     features: {
       title: 'Our Core Features',

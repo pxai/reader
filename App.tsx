@@ -41,19 +41,44 @@ const TrainingView: React.FC = () => {
   const navigate = useNavigate();
 
   const lines = useMemo(() => {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    let chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    let layouts = [1, 1, 1]; // Default layout (1 char per column)
+
+    if (id === '1') {
+      if (level === '2') chars += '0123456789';
+      if (level === '3') chars += 'abcdefghijklmnopqrstuvwxyz0123456789';
+    } else if (id === '2') {
+      layouts = [1, 3, 1]; // Exercise 2 layout requested: U YSA Z
+      if (level === '2') chars += '0123456789';
+      if (level === '3') chars += 'abcdefghijklmnopqrstuvwxyz0123456789';
+    } else if (id === '3') {
+      layouts = [1, 1, 1, 1, 1]; // Exercise 3 layout: Z P K R A
+      if (level === '2') chars += '0123456789';
+      if (level === '3') chars += 'abcdefghijklmnopqrstuvwxyz0123456789';
+    } else if (id === '4') {
+      layouts = [1, 1, 3, 1, 1]; // Exercise 4 layout: K O UBP G E
+      if (level === '2') chars += '0123456789';
+      if (level === '3') chars += 'abcdefghijklmnopqrstuvwxyz0123456789';
+    } else if (id === '5') {
+      layouts = [1, 1, 1, 3, 1, 1, 1]; // Exercise 5 layout: E C K LJC R U P
+      if (level === '2') chars += '0123456789';
+      if (level === '3') chars += 'abcdefghijklmnopqrstuvwxyz0123456789';
+    }
+
     const result = [];
     for (let i = 0; i < 60; i++) {
-      const lineChars = Array.from({ length: 3 }, () => chars[Math.floor(Math.random() * chars.length)]);
+      const lineChars = layouts.map(len => 
+        Array.from({ length: len }, () => chars[Math.floor(Math.random() * chars.length)]).join('')
+      );
       result.push(lineChars);
     }
     return result;
-  }, []);
+  }, [id, level]);
 
   return (
     <div className="min-h-screen bg-white py-12 px-4 animate-in fade-in duration-500">
-      <div className="max-w-2xl mx-auto">
-        <div className="flex justify-between items-center mb-12 sticky top-24 bg-white/90 backdrop-blur py-4 z-10 border-b border-slate-100">
+      <div className="max-w-4xl mx-auto">
+        <div className="flex justify-between items-center mb-12 sticky top-24 bg-white/90 backdrop-blur py-4 z-10 border-b border-slate-100 px-4">
           <button 
             onClick={() => navigate(`/vision-span/exercise/${id}`)}
             className="text-blue-600 font-bold hover:underline"
@@ -66,10 +91,20 @@ const TrainingView: React.FC = () => {
         </div>
         <div className="flex flex-col items-center space-y-8 font-mono text-2xl md:text-4xl text-slate-800">
           {lines.map((line, idx) => (
-            <div key={idx} className="flex justify-center w-full max-w-md">
-              <span className="w-1/3 text-center">{line[0]}</span>
-              <span className="w-1/3 text-center">{line[1]}</span>
-              <span className="w-1/3 text-center">{line[2]}</span>
+            <div key={idx} className="flex justify-center w-full max-w-2xl px-4">
+              {line.map((item, iIdx) => (
+                <span 
+                  key={iIdx} 
+                  className={`flex-1 text-center whitespace-pre ${
+                    id === '5' ? (
+                      (iIdx === 2 || iIdx === 5) ? 'ml-12 md:ml-20' : 
+                      (iIdx === 3 || iIdx === 4) ? 'ml-6 md:ml-10' : ''
+                    ) : ''
+                  }`}
+                >
+                  {item}
+                </span>
+              ))}
             </div>
           ))}
         </div>
@@ -90,8 +125,8 @@ const VisionSpanSelect: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto px-6 py-20 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <h2 className="text-4xl font-black text-slate-900 mb-12 text-center">Vision Span Exercises</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-        {[1, 2, 3, 4].map((num) => (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
+        {[1, 2, 3, 4, 5].map((num) => (
           <Link
             key={num}
             to={`/vision-span/exercise/${num}`}
@@ -158,14 +193,14 @@ const Home: React.FC<HomeProps> = ({ t }) => (
       <p className="max-w-2xl mx-auto text-xl text-slate-500 mb-12 leading-relaxed">
         {t.hero.subtitle}
       </p>
-      <Link to="/contact" className="px-12 py-5 bg-blue-600 text-white font-black rounded-2xl shadow-2xl shadow-blue-600/20 hover:bg-blue-700 transition-all hover:-translate-y-1 inline-block">
+      <Link to="/vision-span" className="px-12 py-5 bg-blue-600 text-white font-black rounded-2xl shadow-2xl shadow-blue-600/20 hover:bg-blue-700 transition-all hover:-translate-y-1 inline-block">
         {t.hero.cta}
       </Link>
     </header>
 
     <section className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-8 py-20">
       {t.features.items.map((f, i: number) => {
-        const isVisionSpan = f.title === "Vision Span";
+        const isVisionSpan = i === 0;
         const content = (
           <div className="bg-white p-10 rounded-[32px] border border-slate-200 hover:shadow-xl transition-all group h-full">
             <div className="text-4xl mb-6">{f.icon}</div>
