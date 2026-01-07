@@ -1,6 +1,6 @@
 
-import React, { useState, useEffect } from 'react';
-import { HashRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import React, { useState, useEffect, useMemo } from 'react';
+import { HashRouter as Router, Routes, Route, Link, useParams, useNavigate } from 'react-router-dom';
 import { translations } from './translations';
 import { Language, TranslationContent } from './types';
 
@@ -36,6 +36,115 @@ const Navbar: React.FC<NavbarProps> = ({ t, currentLang, setLang }) => (
   </nav>
 );
 
+const TrainingView: React.FC = () => {
+  const { id, level } = useParams<{ id: string; level: string }>();
+  const navigate = useNavigate();
+
+  const lines = useMemo(() => {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const result = [];
+    for (let i = 0; i < 60; i++) {
+      const lineChars = Array.from({ length: 3 }, () => chars[Math.floor(Math.random() * chars.length)]);
+      result.push(lineChars);
+    }
+    return result;
+  }, []);
+
+  return (
+    <div className="min-h-screen bg-white py-12 px-4 animate-in fade-in duration-500">
+      <div className="max-w-2xl mx-auto">
+        <div className="flex justify-between items-center mb-12 sticky top-24 bg-white/90 backdrop-blur py-4 z-10 border-b border-slate-100">
+          <button 
+            onClick={() => navigate(`/vision-span/exercise/${id}`)}
+            className="text-blue-600 font-bold hover:underline"
+          >
+            ← Exit Training
+          </button>
+          <div className="text-slate-400 font-bold uppercase tracking-widest text-xs">
+            Ex {id} • Level {level}
+          </div>
+        </div>
+        <div className="flex flex-col items-center space-y-8 font-mono text-2xl md:text-4xl text-slate-800">
+          {lines.map((line, idx) => (
+            <div key={idx} className="flex justify-center w-full max-w-md">
+              <span className="w-1/3 text-center">{line[0]}</span>
+              <span className="w-1/3 text-center">{line[1]}</span>
+              <span className="w-1/3 text-center">{line[2]}</span>
+            </div>
+          ))}
+        </div>
+        <div className="mt-20 text-center pb-20">
+          <button 
+             onClick={() => navigate(`/vision-span/exercise/${id}`)}
+             className="px-8 py-4 bg-slate-900 text-white font-bold rounded-xl"
+          >
+            Finish Exercise
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const VisionSpanSelect: React.FC = () => {
+  return (
+    <div className="max-w-7xl mx-auto px-6 py-20 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <h2 className="text-4xl font-black text-slate-900 mb-12 text-center">Vision Span Exercises</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        {[1, 2, 3, 4].map((num) => (
+          <Link
+            key={num}
+            to={`/vision-span/exercise/${num}`}
+            className="group relative h-64 bg-white border border-slate-200 rounded-[32px] overflow-hidden hover:shadow-2xl hover:border-blue-300 transition-all flex flex-col items-center justify-center gap-4"
+          >
+            <div className="w-16 h-16 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-colors">
+               <span className="text-2xl font-black">{num}</span>
+            </div>
+            <span className="text-xl font-bold text-slate-900">Exercise {num}</span>
+            <div className="absolute inset-x-0 bottom-0 h-1 bg-blue-600 scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const ExerciseLevelSelect: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+
+  return (
+    <div className="max-w-4xl mx-auto px-6 py-20 animate-in fade-in slide-in-from-bottom-4 duration-500 text-center">
+      <button 
+        onClick={() => navigate('/vision-span')}
+        className="mb-8 text-blue-600 font-bold flex items-center gap-2 mx-auto hover:underline"
+      >
+        ← Back to Exercises
+      </button>
+      <h2 className="text-4xl font-black text-slate-900 mb-4">Exercise {id}</h2>
+      <p className="text-slate-500 mb-12">Select your difficulty level to begin</p>
+      
+      <div className="flex flex-col gap-4 max-w-md mx-auto">
+        {[1, 2, 3].map((level) => (
+          <button
+            key={level}
+            onClick={() => navigate(`/vision-span/exercise/${id}/level/${level}`)}
+            className="group p-6 bg-white border border-slate-200 rounded-2xl flex items-center justify-between hover:border-blue-600 hover:shadow-lg transition-all"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 rounded-full bg-slate-100 group-hover:bg-blue-100 flex items-center justify-center font-bold text-slate-600 group-hover:text-blue-600">
+                {level}
+              </div>
+              <span className="text-lg font-bold text-slate-800">Level {level}</span>
+            </div>
+            <span className="text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity font-black">START →</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 interface HomeProps {
   t: TranslationContent;
 }
@@ -55,13 +164,24 @@ const Home: React.FC<HomeProps> = ({ t }) => (
     </header>
 
     <section className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-8 py-20">
-      {t.features.items.map((f, i: number) => (
-        <div key={i} className="bg-white p-10 rounded-[32px] border border-slate-200 hover:shadow-xl transition-all group">
-          <div className="text-4xl mb-6">{f.icon}</div>
-          <h3 className="text-2xl font-bold mb-4">{f.title}</h3>
-          <p className="text-slate-500 leading-relaxed">{f.description}</p>
-        </div>
-      ))}
+      {t.features.items.map((f, i: number) => {
+        const isVisionSpan = f.title === "Vision Span";
+        const content = (
+          <div className="bg-white p-10 rounded-[32px] border border-slate-200 hover:shadow-xl transition-all group h-full">
+            <div className="text-4xl mb-6">{f.icon}</div>
+            <h3 className="text-2xl font-bold mb-4 group-hover:text-blue-600 transition-colors">{f.title}</h3>
+            <p className="text-slate-500 leading-relaxed">{f.description}</p>
+          </div>
+        );
+
+        return isVisionSpan ? (
+          <Link key={i} to="/vision-span" className="block transform transition-transform hover:-translate-y-2">
+            {content}
+          </Link>
+        ) : (
+          <div key={i}>{content}</div>
+        );
+      })}
     </section>
   </div>
 );
@@ -85,8 +205,11 @@ const App: React.FC = () => {
         <main className="pb-32">
           <Routes>
             <Route path="/" element={<Home t={t} />} />
+            <Route path="/vision-span" element={<VisionSpanSelect />} />
+            <Route path="/vision-span/exercise/:id" element={<ExerciseLevelSelect />} />
+            <Route path="/vision-span/exercise/:id/level/:level" element={<TrainingView />} />
             <Route path="/about" element={<div className="py-20 text-center text-4xl font-black">{t.nav.about}</div>} />
-            <Route path="/contact" element={<div className="py-20 text-center text-4xl font-black">{t.nav.contact}</div>} />
+            <Route path="/contact" element={<div className="py-20 text-center text-4xl font-black">{t.contact.title}</div>} />
           </Routes>
         </main>
         <footer className="py-12 text-center text-slate-400 font-medium border-t border-slate-200">
