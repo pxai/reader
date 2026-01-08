@@ -1,0 +1,234 @@
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useWikipedia, WikipediaArticle } from './WikipediaContext';
+
+interface DrillMode {
+  id: string;
+  title: string;
+  description: string;
+  speed: number;
+}
+
+const DRILL_MODES: DrillMode[] = [
+  { id: 'normal', title: 'Normal drill', description: 'read at normal speed', speed: 1 },
+  { id: 'double', title: 'Double drill', description: 'read at x2 speed', speed: 2 },
+  { id: 'triple', title: 'Triple drill', description: 'read at x3 speed', speed: 3 },
+  { id: 'quad', title: 'Quadruple drill', description: 'read at x4 speed', speed: 4 },
+];
+
+const ReadDrill: React.FC = () => {
+  const navigate = useNavigate();
+  const { article, isLoading, consumeArticle, defaultText } = useWikipedia();
+  
+  const [selectedDrill, setSelectedDrill] = useState<string>('normal');
+  const [timeLeft, setTimeLeft] = useState(60);
+  const [timerRunning, setTimerRunning] = useState(false);
+  const [isFinished, setIsFinished] = useState(false);
+  const [showText, setShowText] = useState(false);
+  const [showInstruction, setShowInstruction] = useState(false);
+  const [calculatedWPM, setCalculatedWPM] = useState<number | null>(null);
+  const [currentArticle, setCurrentArticle] = useState<WikipediaArticle | null>(null);
+  
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Set initial article or fallback
+  useEffect(() => {
+    if (!currentArticle && article) {
+      setCurrentArticle(article);
+    }
+  }, [article, currentArticle]);
+
+  const activeArticle = currentArticle || article || defaultText;
+  
+  // Flatten words and keep track of segment indices
+  const wordsWithMetadata = useMemo(() => {
+    let globalIndex = 0;
+    return activeArticle.segments.map(segment => {
+      const segmentWords = segment.text.trim().split(/\s+/);
+      const result = {
+        ...segment,
+        words: segmentWords.map(w => ({ text: w, index: globalIndex++ }))
+      };
+      return result;
+    });
+  }, [activeArticle]);
+
+  useEffect(() => {
+    if (timerRunning && timeLeft > 0) {
+      timerRef.current = setInterval(() => {
+        setTimeLeft((prev) => prev - 1);
+      }, 1000);
+    } else if (timeLeft === 0) {
+      setTimerRunning(false);
+      setIsFinished(true);
+      setShowInstruction(true);
+      if (timerRef.current) clearInterval(timerRef.current);
+    }
+
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [timerRunning, timeLeft]);
+
+  const startDrill = () => {
+    setTimeLeft(60);
+    setTimerRunning(true);
+    setIsFinished(false);
+    setShowText(true);
+    setCalculatedWPM(null);
+    setShowInstruction(false);
+  };
+
+  const resetDrill = () => {
+    setTimerRunning(false);
+    setTimeLeft(60);
+    setIsFinished(false);
+    setShowText(false);
+    setCalculatedWPM(null);
+    setShowInstruction(false);
+    if (timerRef.current) clearInterval(timerRef.current);
+    
+    // Switch to next article if we are resetting after a finished drill
+    if (isFinished) {
+      consumeArticle();
+      setCurrentArticle(null); // This will trigger the useEffect to pick the next one
+    }
+  };
+
+  const handleWordClick = (index: number) => {
+    if (isFinished && !calculatedWPM) {
+      setCalculatedWPM(index + 1);
+      setShowInstruction(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-50 py-12 px-4 animate-in fade-in duration-500">
+      <style>
+        {`
+          @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+          }
+          .animate-blink {
+            animation: blink 0.5s linear infinite;
+          }
+        `}
+      </style>
+      <div className="max-w-6xl mx-auto">
+        <div className="flex justify-between items-center mb-8 sticky top-24 bg-white/80 backdrop-blur-xl py-4 z-50 border-b border-slate-200 px-6 rounded-2xl shadow-sm">
+          <button 
+            onClick={() => navigate('/')}
+            className="text-blue-600 font-bold hover:underline flex items-center gap-2"
+          >
+            ← Back to Home
+          </button>
+        </div>
+        
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 mb-12">
+          {DRILL_MODES.map((mode) => (
+            <button
+              key={mode.id}
+              onClick={() => {
+                setSelectedDrill(mode.id);
+                resetDrill();
+              }}
+              className={`p-6 rounded-[24px] border-2 transition-all text-left group ${
+                selectedDrill === mode.id 
+                  ? 'bg-white border-blue-600 shadow-xl ring-4 ring-blue-50' 
+                  : 'bg-white border-slate-200 hover:border-blue-300 hover:shadow-lg'
+              }`}
+            >
+              <h3 className={`text-lg font-black mb-1 ${selectedDrill === mode.id ? 'text-blue-600' : 'text-slate-900'}`}>
+                {mode.title}
+              </h3>
+              <p className="text-sm text-slate-500 font-medium">{mode.description}</p>
+            </button>
+          ))}
+        </div>
+
+        <div className="flex flex-col items-center gap-8 mb-12">
+          <div className="flex items-center gap-6">
+            <div className={`text-6xl font-black tabular-nums ${timeLeft <= 10 ? 'text-red-500' : 'text-slate-900'}`}>
+              00:{timeLeft.toString().padStart(2, '0')}
+            </div>
+            {!timerRunning ? (
+              <button 
+                onClick={startDrill}
+                className="px-10 py-4 bg-blue-600 text-white font-black rounded-2xl shadow-xl shadow-blue-600/20 hover:bg-blue-700 hover:scale-105 transition-all text-2xl"
+              >
+                {calculatedWPM ? 'RESTART' : 'START DRILL'}
+              </button>
+            ) : (
+              <button 
+                onClick={resetDrill}
+                className="px-10 py-4 bg-slate-200 text-slate-600 font-black rounded-2xl hover:bg-slate-300 transition-all text-2xl"
+              >
+                RESET
+              </button>
+            )}
+          </div>
+
+          {calculatedWPM !== null && (
+            <div className="flex flex-col items-center animate-in zoom-in duration-300">
+              <div className="text-sm font-black text-slate-400 uppercase tracking-widest mb-1">Results</div>
+              <div className="flex items-baseline gap-2">
+                <span className="text-7xl font-black text-blue-600">{calculatedWPM}</span>
+                <span className="text-2xl font-black text-slate-900">WPM</span>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {showInstruction && (
+          <div className="fixed bottom-12 left-1/2 -translate-x-1/2 z-[100] animate-in slide-in-from-bottom-8 duration-500">
+            <div className="bg-slate-900 text-white px-8 py-4 rounded-2xl shadow-2xl flex items-center gap-4 border border-white/10 backdrop-blur-xl">
+              <span className="text-2xl">👆</span>
+              <p className="font-bold text-lg">Click on the last word you were reading when the timer stopped</p>
+            </div>
+          </div>
+        )}
+
+        {showText && (
+          <div className={`bg-white p-12 md:p-20 rounded-[48px] shadow-2xl border border-slate-100 transition-all relative ${isFinished && !calculatedWPM ? 'ring-8 ring-blue-100' : ''} ${isFinished && calculatedWPM ? 'opacity-50 grayscale-[0.5]' : ''}`}>
+            <div className="max-w-3xl mx-auto">
+              <div className="flex items-center justify-center gap-4 mb-12 opacity-20">
+                 <div className="h-px w-20 bg-slate-900" />
+                 <span className="text-2xl">🌍</span>
+                 <div className="h-px w-20 bg-slate-900" />
+              </div>
+              <div className={`text-xl md:text-2xl text-slate-700 leading-[2.2] text-justify font-serif transition-all ${isFinished && !calculatedWPM ? 'cursor-pointer' : ''}`}>
+                {wordsWithMetadata.map((segment, sIdx) => {
+                  const Tag = segment.type;
+                  const className = segment.type === 'p' 
+                    ? 'mb-8' 
+                    : segment.type === 'h3' 
+                      ? 'text-3xl font-black text-slate-900 mt-12 mb-6 block' 
+                      : 'text-2xl font-bold text-slate-800 mt-8 mb-4 block';
+                  
+                  return (
+                    <Tag key={sIdx} className={className}>
+                      {segment.words.map((word) => (
+                        <span
+                          key={word.index}
+                          onClick={() => handleWordClick(word.index)}
+                          className={`inline-block px-1 rounded transition-colors ${
+                            isFinished && !calculatedWPM ? 'hover:bg-blue-100 hover:text-blue-900' : ''
+                          } ${calculatedWPM !== null && word.index < calculatedWPM ? 'text-blue-600/40' : ''} ${calculatedWPM !== null && word.index === calculatedWPM - 1 ? 'bg-blue-600 text-white ring-4 ring-blue-100' : ''}`}
+                        >
+                          {word.text}{' '}
+                        </span>
+                      ))}
+                    </Tag>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default ReadDrill;

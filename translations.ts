@@ -5,8 +5,8 @@ export const translations: Translations = {
   [Language.EN]: {
     nav: { home: 'Home', features: 'Features', about: 'About', contact: 'Contact' },
     hero: {
-      title: 'Build Faster, Reach Further',
-      subtitle: 'A modern, multilingual static site template powered by React and Tailwind CSS. Perfect for global reach.',
+      title: 'Read Faster and Better',
+      subtitle: 'Improve your reading speed and retention with these daily exercises',
       cta: 'Vision Span'
     },
     features: {
@@ -29,9 +29,9 @@ export const translations: Translations = {
   [Language.ES]: {
     nav: { home: 'Inicio', features: 'Características', about: 'Nosotros', contact: 'Contacto' },
     hero: {
-      title: 'Construye Rápido, Llega Lejos',
-      subtitle: 'Una plantilla de sitio estático moderna y multilingüe impulsada por React y Tailwind CSS. Ideal para alcance global.',
-      cta: 'Empezar ahora'
+      title: 'Lee más rápido y mejor',
+      subtitle: 'Mejora tu velocidad de lectura y retención con estos ejercicios diarios',
+      cta: 'Vision Span'
     },
     features: {
       title: 'Nuestras Características',
@@ -53,8 +53,8 @@ export const translations: Translations = {
   [Language.FR]: {
     nav: { home: 'Accueil', features: 'Fonctionnalités', about: 'À Propos', contact: 'Contact' },
     hero: {
-      title: 'Construisez Vite, Allez Loin',
-      subtitle: 'Un modèle de site statique moderne et multilingue propulsé par React et Tailwind CSS. Parfait pour un rayonnement mondial.',
+      title: 'Lisez plus vite et mieux',
+      subtitle: 'Améliorez votre vitesse de lecture et votre mémorisation grâce à ces exercices quotidiens',
       cta: 'Commencer'
     },
     features: {
@@ -77,8 +77,8 @@ export const translations: Translations = {
   [Language.DE]: {
     nav: { home: 'Startseite', features: 'Funktionen', about: 'Über uns', contact: 'Kontakt' },
     hero: {
-      title: 'Schneller bauen, weiter kommen',
-      subtitle: 'Eine moderne, mehrsprachige statische Seitenvorlage auf Basis von React und Tailwind CSS.',
+      title: 'Schneller und besser lesen',
+      subtitle: 'Verbessern Sie Ihre Lesegeschwindigkeit und Ihr Gedächtnis mit diesen täglichen Übungen',
       cta: 'Jetzt loslegen'
     },
     features: {

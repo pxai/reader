@@ -3,6 +3,8 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { HashRouter as Router, Routes, Route, Link, useParams, useNavigate } from 'react-router-dom';
 import { translations } from './translations';
 import { Language, TranslationContent } from './types';
+import ReadDrill from './ReadDrill';
+import { WikipediaProvider } from './WikipediaContext';
 
 interface NavbarProps {
   t: TranslationContent;
@@ -213,6 +215,10 @@ const Home: React.FC<HomeProps> = ({ t }) => (
           <Link key={i} to="/vision-span" className="block transform transition-transform hover:-translate-y-2">
             {content}
           </Link>
+        ) : i === 1 ? (
+          <Link key={i} to="/read-drill" className="block transform transition-transform hover:-translate-y-2">
+            {content}
+          </Link>
         ) : (
           <div key={i}>{content}</div>
         );
@@ -234,24 +240,27 @@ const App: React.FC = () => {
   const t = translations[lang];
 
   return (
-    <Router>
-      <div className="min-h-screen bg-slate-50 selection:bg-blue-100 selection:text-blue-900">
-        <Navbar t={t} currentLang={lang} setLang={setLang} />
-        <main className="pb-32">
-          <Routes>
-            <Route path="/" element={<Home t={t} />} />
-            <Route path="/vision-span" element={<VisionSpanSelect />} />
-            <Route path="/vision-span/exercise/:id" element={<ExerciseLevelSelect />} />
-            <Route path="/vision-span/exercise/:id/level/:level" element={<TrainingView />} />
-            <Route path="/about" element={<div className="py-20 text-center text-4xl font-black">{t.nav.about}</div>} />
-            <Route path="/contact" element={<div className="py-20 text-center text-4xl font-black">{t.contact.title}</div>} />
-          </Routes>
-        </main>
-        <footer className="py-12 text-center text-slate-400 font-medium border-t border-slate-200">
-           © {new Date().getFullYear()} POLYGLOT. {t.footer.rights}
-        </footer>
-      </div>
-    </Router>
+    <WikipediaProvider>
+      <Router>
+        <div className="min-h-screen bg-slate-50 selection:bg-blue-100 selection:text-blue-900">
+          <Navbar t={t} currentLang={lang} setLang={setLang} />
+          <main className="pb-32">
+            <Routes>
+              <Route path="/" element={<Home t={t} />} />
+              <Route path="/vision-span" element={<VisionSpanSelect />} />
+              <Route path="/vision-span/exercise/:id" element={<ExerciseLevelSelect />} />
+              <Route path="/vision-span/exercise/:id/level/:level" element={<TrainingView />} />
+              <Route path="/about" element={<div className="py-20 text-center text-4xl font-black">{t.nav.about}</div>} />
+              <Route path="/read-drill" element={<ReadDrill />} />
+              <Route path="/contact" element={<div className="py-20 text-center text-4xl font-black">{t.contact.title}</div>} />
+            </Routes>
+          </main>
+          <footer className="py-12 text-center text-slate-400 font-medium border-t border-slate-200">
+             © {new Date().getFullYear()} POLYGLOT. {t.footer.rights}
+          </footer>
+        </div>
+      </Router>
+    </WikipediaProvider>
   );
 };
 
