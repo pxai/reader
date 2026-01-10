@@ -13,7 +13,7 @@ const DRILL_MODES: DrillMode[] = [
   { id: 'normal', title: 'Normal drill', description: 'read at normal speed', speed: 1 },
   { id: 'double', title: 'Double drill', description: 'read at x2 speed', speed: 2 },
   { id: 'triple', title: 'Triple drill', description: 'read at x3 speed', speed: 3 },
-  { id: 'quad', title: 'Quadruple drill', description: 'read at x4 speed', speed: 4 },
+  { id: 'normal_2', title: 'Normal drill', description: 'read at normal speed', speed: 1 },
 ];
 
 const ReadDrill: React.FC = () => {
@@ -28,6 +28,7 @@ const ReadDrill: React.FC = () => {
   const [showInstruction, setShowInstruction] = useState(false);
   const [calculatedWPM, setCalculatedWPM] = useState<number | null>(null);
   const [currentArticle, setCurrentArticle] = useState<WikipediaArticle | null>(null);
+  const [isAutoscrollActive, setIsAutoscrollActive] = useState(false);
   
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -53,6 +54,7 @@ const ReadDrill: React.FC = () => {
     });
   }, [activeArticle]);
 
+  // Timer logic
   useEffect(() => {
     if (timerRunning && timeLeft > 0) {
       timerRef.current = setInterval(() => {
@@ -69,6 +71,36 @@ const ReadDrill: React.FC = () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
   }, [timerRunning, timeLeft]);
+
+  // Autoscroll logic
+  useEffect(() => {
+    let animationFrameId: number;
+    let lastTime: number;
+
+    const animate = (time: number) => {
+      if (lastTime !== undefined) {
+        const deltaTime = (time - lastTime) / 1000; // in seconds
+        
+        const currentMode = DRILL_MODES.find(m => m.id === selectedDrill);
+        const baseSpeedPPS = 20; // Pixels per second for 1x speed
+        const speedMultiplier = currentMode ? currentMode.speed : 1;
+        const scrollAmount = baseSpeedPPS * speedMultiplier * deltaTime;
+
+        window.scrollBy({ top: scrollAmount, behavior: 'auto' });
+      }
+      lastTime = time;
+      animationFrameId = requestAnimationFrame(animate);
+    };
+
+    if (timerRunning && isAutoscrollActive) {
+      animationFrameId = requestAnimationFrame(animate);
+    }
+
+    return () => {
+      if (animationFrameId) cancelAnimationFrame(animationFrameId);
+    };
+  }, [timerRunning, isAutoscrollActive, selectedDrill]);
+
 
   const startDrill = () => {
     setTimeLeft(60);
@@ -87,6 +119,7 @@ const ReadDrill: React.FC = () => {
     setCalculatedWPM(null);
     setShowInstruction(false);
     if (timerRef.current) clearInterval(timerRef.current);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     
     // Switch to next article if we are resetting after a finished drill
     if (isFinished) {
@@ -167,6 +200,22 @@ const ReadDrill: React.FC = () => {
                 RESET
               </button>
             )}
+          </div>
+          
+          <div className="flex items-center gap-3 bg-white p-2 rounded-xl border border-slate-200 shadow-sm">
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input 
+                type="checkbox" 
+                className="sr-only peer" 
+                checked={isAutoscrollActive}
+                onChange={(e) => setIsAutoscrollActive(e.target.checked)}
+              />
+              <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-300 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+              <span className="ml-3 text-sm font-bold text-slate-700">Autoscroll</span>
+            </label>
+            <span className="text-xs text-slate-400 font-medium px-2 py-1 bg-slate-100 rounded-md">
+               {DRILL_MODES.find(m => m.id === selectedDrill)?.speed}x speed
+            </span>
           </div>
 
           {calculatedWPM !== null && (
