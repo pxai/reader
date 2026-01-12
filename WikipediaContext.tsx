@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 
 export type SegmentType = 'h3' | 'h4' | 'p';

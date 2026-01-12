@@ -82,7 +82,7 @@ const ReadDrill: React.FC = () => {
         const deltaTime = (time - lastTime) / 1000; // in seconds
         
         const currentMode = DRILL_MODES.find(m => m.id === selectedDrill);
-        const baseSpeedPPS = 20; // Pixels per second for 1x speed
+        const baseSpeedPPS = 10; // Pixels per second for 1x speed
         const speedMultiplier = currentMode ? currentMode.speed : 1;
         const scrollAmount = baseSpeedPPS * speedMultiplier * deltaTime;
 
@@ -214,7 +214,7 @@ const ReadDrill: React.FC = () => {
               <span className="ml-3 text-sm font-bold text-slate-700">Autoscroll</span>
             </label>
             <span className="text-xs text-slate-400 font-medium px-2 py-1 bg-slate-100 rounded-md">
-               {DRILL_MODES.find(m => m.id === selectedDrill)?.speed}x speed
+               {parseFloat(DRILL_MODES.find(m => m.id === selectedDrill)?.speed.toFixed(2) || '0')}x speed
             </span>
           </div>
 

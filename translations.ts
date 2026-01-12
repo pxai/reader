@@ -13,7 +13,7 @@ export const translations: Translations = {
       title: 'Our Core Features',
       items: [
         { title: 'Vision Span', description: 'Interactive eye-tracking and peripheral vision exercises.', icon: '👁️' },
-        { title: 'Multilang Ready', description: 'Seamlessly switch between languages with zero page reloads.', icon: '🌐' },
+        { title: 'Read Drills', description: 'Practice reading efficiently with guided drills.', icon: '🌐' },
         { title: 'Optimized SEO', description: 'Built with static performance in mind for search engine visibility.', icon: '🚀' }
       ]
     },
@@ -37,7 +37,7 @@ export const translations: Translations = {
       title: 'Nuestras Características',
       items: [
         { title: 'Vision Span', description: 'Ejercicios interactivos de seguimiento ocular y visión periférica.', icon: '👁️' },
-        { title: 'Listo para Varios Idiomas', description: 'Cambia entre idiomas sin recargar la página.', icon: '🌐' },
+        { title: 'Ejercicios de Lectura', description: 'Practica la lectura eficiente con ejercicios guiados.', icon: '🌐' },
         { title: 'SEO Optimizado', description: 'Construido pensando en el rendimiento para visibilidad en buscadores.', icon: '🚀' }
       ]
     },
@@ -61,7 +61,7 @@ export const translations: Translations = {
       title: 'Nos Fonctionnalités',
       items: [
         { title: 'Vision Span', description: 'Exercices interactifs de poursuite oculaire et de vision périphérique.', icon: '👁️' },
-        { title: 'Prêt pour le Multilingue', description: 'Changez de langue sans recharger la page.', icon: '🌐' },
+        { title: 'Exercices de Lecture', description: 'Entraînez-vous à lire efficacement avec des exercices guidés.', icon: '🌐' },
         { title: 'SEO Optimisé', description: 'Conçu pour la performance et la visibilité sur les moteurs de recherche.', icon: '🚀' }
       ]
     },
@@ -85,7 +85,7 @@ export const translations: Translations = {
       title: 'Unsere Funktionen',
       items: [
         { title: 'Vision Span', description: 'Interaktive Augen-Tracking- und Peripheriesicht-Übungen.', icon: '👁️' },
-        { title: 'Mehrsprachigkeit', description: 'Nahtloser Sprachwechsel ohne Neuladen der Seite.', icon: '🌐' },
+        { title: 'Leseübungen', description: 'Üben Sie effizientes Lesen mit angeleiteten Übungen.', icon: '🌐' },
         { title: 'SEO Optimiert', description: 'Optimiert für Suchmaschinen-Sichtbarkeit.', icon: '🚀' }
       ]
     },
