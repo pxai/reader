@@ -128,10 +128,26 @@ const ReadDrill: React.FC = () => {
     }
   };
 
+
   const handleWordClick = (index: number) => {
     if (isFinished && !calculatedWPM) {
-      setCalculatedWPM(index + 1);
+      const wpm = index + 1;
+      setCalculatedWPM(wpm);
       setShowInstruction(false);
+
+      // Save to local storage
+      const newStat = {
+        timestamp: Date.now(),
+        type: selectedDrill,
+        wpm: wpm
+      };
+
+      try {
+        const existingStats = JSON.parse(localStorage.getItem('read_drill_stats') || '[]');
+        localStorage.setItem('read_drill_stats', JSON.stringify([...existingStats, newStat]));
+      } catch (e) {
+        console.error('Failed to save stats', e);
+      }
     }
   };
 
@@ -221,10 +237,16 @@ const ReadDrill: React.FC = () => {
           {calculatedWPM !== null && (
             <div className="flex flex-col items-center animate-in zoom-in duration-300">
               <div className="text-sm font-black text-slate-400 uppercase tracking-widest mb-1">Results</div>
-              <div className="flex items-baseline gap-2">
+              <div className="flex items-baseline gap-2 mb-4">
                 <span className="text-7xl font-black text-blue-600">{calculatedWPM}</span>
                 <span className="text-2xl font-black text-slate-900">WPM</span>
               </div>
+              <button
+                onClick={() => navigate('/stats')}
+                className="text-blue-600 font-bold hover:underline flex items-center gap-2"
+              >
+                View Progress →
+              </button>
             </div>
           )}
         </div>

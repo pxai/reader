@@ -4,6 +4,7 @@ import { HashRouter as Router, Routes, Route, Link, useParams, useNavigate } fro
 import { translations } from './translations';
 import { Language, TranslationContent } from './types';
 import ReadDrill from './ReadDrill';
+import Stats from './Stats';
 import { WikipediaProvider } from './WikipediaContext';
 
 interface NavbarProps {
@@ -18,6 +19,7 @@ const Navbar: React.FC<NavbarProps> = ({ t, currentLang, setLang }) => (
       <Link to="/" className="text-2xl font-black text-blue-600 tracking-tighter">READER</Link>
       <div className="hidden md:flex gap-8 font-bold text-slate-500">
         <Link to="/" className="hover:text-blue-600 transition-colors">{t.nav.home}</Link>
+        <Link to="/stats" className="hover:text-blue-600 transition-colors">{t.nav.progress}</Link>
         <Link to="/about" className="hover:text-blue-600 transition-colors">{t.nav.about}</Link>
         <Link to="/contact" className="hover:text-blue-600 transition-colors">{t.nav.contact}</Link>
       </div>
@@ -41,6 +43,41 @@ const Navbar: React.FC<NavbarProps> = ({ t, currentLang, setLang }) => (
 const TrainingView: React.FC = () => {
   const { id, level } = useParams<{ id: string; level: string }>();
   const navigate = useNavigate();
+  const [isAutoscrollActive, setIsAutoscrollActive] = useState(false);
+  const [scrollSpeed, setScrollSpeed] = useState(1);
+
+  // Autoscroll logic
+  useEffect(() => {
+    let animationFrameId: number;
+    let lastTime: number;
+
+    const animate = (time: number) => {
+      if (lastTime !== undefined) {
+        const deltaTime = (time - lastTime) / 1000; // in seconds
+        
+        const baseSpeedPPS = 20; // Pixels per second for 1x speed - slightly faster base for vision span
+        const scrollAmount = baseSpeedPPS * scrollSpeed * deltaTime;
+
+        window.scrollBy({ top: scrollAmount, behavior: 'auto' });
+        
+        // Stop if we've reached the bottom
+        if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight) {
+           setIsAutoscrollActive(false);
+           return;
+        }
+      }
+      lastTime = time;
+      animationFrameId = requestAnimationFrame(animate);
+    };
+
+    if (isAutoscrollActive) {
+      animationFrameId = requestAnimationFrame(animate);
+    }
+
+    return () => {
+      if (animationFrameId) cancelAnimationFrame(animationFrameId);
+    };
+  }, [isAutoscrollActive, scrollSpeed]);
 
   const lines = useMemo(() => {
     let chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -80,17 +117,53 @@ const TrainingView: React.FC = () => {
   return (
     <div className="min-h-screen bg-white py-12 px-4 animate-in fade-in duration-500">
       <div className="max-w-4xl mx-auto">
-        <div className="flex justify-between items-center mb-12 sticky top-24 bg-white/90 backdrop-blur py-4 z-10 border-b border-slate-100 px-4">
-          <button 
-            onClick={() => navigate(`/vision-span/exercise/${id}`)}
-            className="text-blue-600 font-bold hover:underline"
-          >
-            ← Exit Training
-          </button>
-          <div className="text-slate-400 font-bold uppercase tracking-widest text-xs">
-            Ex {id} • Level {level}
+        <div className="flex flex-col md:flex-row justify-between items-center mb-12 sticky top-24 bg-white/90 backdrop-blur py-4 z-10 border-b border-slate-100 px-4 gap-4">
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={() => navigate(`/vision-span/exercise/${id}`)}
+              className="text-blue-600 font-bold hover:underline whitespace-nowrap"
+            >
+              ← Exit
+            </button>
+            <div className="text-slate-400 font-bold uppercase tracking-widest text-xs whitespace-nowrap">
+              Ex {id} • Lvl {level}
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4">
+             {/* Autoscroll Toggle */}
+             <div className="flex items-center gap-3 bg-slate-50 p-2 rounded-xl border border-slate-200">
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input 
+                  type="checkbox" 
+                  className="sr-only peer" 
+                  checked={isAutoscrollActive}
+                  onChange={(e) => setIsAutoscrollActive(e.target.checked)}
+                />
+                <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                <span className="ml-2 text-sm font-bold text-slate-700 hidden sm:inline">Autoscroll</span>
+              </label>
+            </div>
+
+            {/* Speed Control */}
+            <div className="flex bg-slate-100 rounded-lg p-1">
+              {[1, 2, 3].map((s) => (
+                <button
+                  key={s}
+                  onClick={() => setScrollSpeed(s)}
+                  className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${
+                    scrollSpeed === s 
+                      ? 'bg-white text-blue-600 shadow-sm' 
+                      : 'text-slate-400 hover:text-slate-600'
+                  }`}
+                >
+                  {s}x
+                </button>
+              ))}
+            </div>
           </div>
         </div>
+        
         <div className="flex flex-col items-center space-y-8 font-mono text-2xl md:text-4xl text-slate-800">
           {lines.map((line, idx) => (
             <div key={idx} className="flex justify-center w-full max-w-2xl px-4">
@@ -252,6 +325,7 @@ const App: React.FC = () => {
               <Route path="/vision-span/exercise/:id/level/:level" element={<TrainingView />} />
               <Route path="/about" element={<div className="py-20 text-center text-4xl font-black">{t.nav.about}</div>} />
               <Route path="/read-drill" element={<ReadDrill />} />
+              <Route path="/stats" element={<Stats />} />
               <Route path="/contact" element={<div className="py-20 text-center text-4xl font-black">{t.contact.title}</div>} />
             </Routes>
           </main>

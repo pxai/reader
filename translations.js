@@ -1,7 +1,7 @@
 
 export const translations = {
   en: {
-    nav: { home: 'Home', features: 'Features', about: 'About', contact: 'Contact' },
+    nav: { home: 'Home', features: 'Features', about: 'About', contact: 'Contact', progress: 'Progress' },
     hero: {
       title: 'Read Faster and Better',
       subtitle: 'Improve your reading speed and retention with these daily exercises',
@@ -25,7 +25,7 @@ export const translations = {
     footer: { rights: 'All rights reserved.' }
   },
   es: {
-    nav: { home: 'Inicio', features: 'Características', about: 'Nosotros', contact: 'Contacto' },
+    nav: { home: 'Inicio', features: 'Características', about: 'Nosotros', contact: 'Contacto', progress: 'Progreso' },
     hero: {
       title: 'Lee más rápido y mejor',
       subtitle: 'Mejora tu velocidad de lectura y retención con estos ejercicios diarios',
@@ -49,7 +49,7 @@ export const translations = {
     footer: { rights: 'Todos los derechos reservados.' }
   },
   fr: {
-    nav: { home: 'Accueil', features: 'Fonctionnalités', about: 'À Propos', contact: 'Contact' },
+    nav: { home: 'Accueil', features: 'Fonctionnalités', about: 'À Propos', contact: 'Contact', progress: 'Progrès' },
     hero: {
       title: 'Lisez plus vite et mieux',
       subtitle: 'Améliorez votre vitesse de lecture et votre mémorisation grâce à ces exercices quotidiens',
