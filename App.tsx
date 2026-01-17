@@ -6,6 +6,19 @@ import { Language, TranslationContent } from './types';
 import ReadDrill from './ReadDrill';
 import Stats from './Stats';
 import { WikipediaProvider } from './WikipediaContext';
+import { 
+  Home as HomeIcon, 
+  BarChart2, 
+  Info, 
+  Mail, 
+  Eye, 
+  Zap, 
+  BookOpen, 
+  ArrowLeft, 
+  ChevronLeft,
+  CheckCircle,
+  MousePointer2
+} from 'lucide-react';
 
 interface NavbarProps {
   t: TranslationContent;
@@ -18,10 +31,18 @@ const Navbar: React.FC<NavbarProps> = ({ t, currentLang, setLang }) => (
     <div className="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
       <Link to="/" className="text-2xl font-black text-blue-600 tracking-tighter">READER</Link>
       <div className="hidden md:flex gap-8 font-bold text-slate-500">
-        <Link to="/" className="hover:text-blue-600 transition-colors">{t.nav.home}</Link>
-        <Link to="/stats" className="hover:text-blue-600 transition-colors">{t.nav.progress}</Link>
-        <Link to="/about" className="hover:text-blue-600 transition-colors">{t.nav.about}</Link>
-        <Link to="/contact" className="hover:text-blue-600 transition-colors">{t.nav.contact}</Link>
+        <Link to="/" className="hover:text-blue-600 transition-colors flex items-center gap-2">
+          <HomeIcon size={18} /> {t.nav.home}
+        </Link>
+        <Link to="/stats" className="hover:text-blue-600 transition-colors flex items-center gap-2">
+          <BarChart2 size={18} /> {t.nav.progress}
+        </Link>
+        <Link to="/about" className="hover:text-blue-600 transition-colors flex items-center gap-2">
+          <Info size={18} /> {t.nav.about}
+        </Link>
+        <Link to="/contact" className="hover:text-blue-600 transition-colors flex items-center gap-2">
+          <Mail size={18} /> {t.nav.contact}
+        </Link>
       </div>
       <div className="flex gap-2 bg-slate-100 p-1 rounded-xl">
         {Object.values(Language).map((l) => (
@@ -55,7 +76,7 @@ const TrainingView: React.FC = () => {
       if (lastTime !== undefined) {
         const deltaTime = (time - lastTime) / 1000; // in seconds
         
-        const baseSpeedPPS = 20; // Pixels per second for 1x speed - slightly faster base for vision span
+        const baseSpeedPPS = 40; // Pixels per second for 1x speed - doubled per user request
         const scrollAmount = baseSpeedPPS * scrollSpeed * deltaTime;
 
         window.scrollBy({ top: scrollAmount, behavior: 'auto' });
@@ -121,9 +142,9 @@ const TrainingView: React.FC = () => {
           <div className="flex items-center gap-4">
             <button 
               onClick={() => navigate(`/vision-span/exercise/${id}`)}
-              className="text-blue-600 font-bold hover:underline whitespace-nowrap"
+              className="text-blue-600 font-bold hover:underline whitespace-nowrap flex items-center gap-2"
             >
-              ← Exit
+              <ChevronLeft size={20} /> Exit
             </button>
             <div className="text-slate-400 font-bold uppercase tracking-widest text-xs whitespace-nowrap">
               Ex {id} • Lvl {level}
@@ -141,7 +162,10 @@ const TrainingView: React.FC = () => {
                   onChange={(e) => setIsAutoscrollActive(e.target.checked)}
                 />
                 <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                <span className="ml-2 text-sm font-bold text-slate-700 hidden sm:inline">Autoscroll</span>
+                <span className="ml-2 text-sm font-bold text-slate-700 flex items-center gap-1.5 hidden sm:inline">
+                  <MousePointer2 size={16} />
+                  Autoscroll
+                </span>
               </label>
             </div>
 
@@ -186,8 +210,9 @@ const TrainingView: React.FC = () => {
         <div className="mt-20 text-center pb-20">
           <button 
              onClick={() => navigate(`/vision-span/exercise/${id}`)}
-             className="px-8 py-4 bg-slate-900 text-white font-bold rounded-xl"
+             className="px-8 py-4 bg-slate-900 text-white font-bold rounded-xl flex items-center gap-3 mx-auto"
           >
+            <CheckCircle size={24} />
             Finish Exercise
           </button>
         </div>
@@ -229,7 +254,7 @@ const ExerciseLevelSelect: React.FC = () => {
         onClick={() => navigate('/vision-span')}
         className="mb-8 text-blue-600 font-bold flex items-center gap-2 mx-auto hover:underline"
       >
-        ← Back to Exercises
+        <ArrowLeft size={20} /> Back to Exercises
       </button>
       <h2 className="text-4xl font-black text-slate-900 mb-4">Exercise {id}</h2>
       <p className="text-slate-500 mb-12">Select your difficulty level to begin</p>
@@ -274,17 +299,17 @@ const Home: React.FC<HomeProps> = ({ t }) => (
     </header>
 
     <section className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-8 py-20">
-      {t.features.items.map((f, i: number) => {
-        const isVisionSpan = i === 0;
+      {t.features.items.map((f: any, i: number) => {
+        const icons = [<Eye size={40} className="text-blue-600" />, <Zap size={40} className="text-blue-600" />, <BookOpen size={40} className="text-blue-600" />];
         const content = (
           <div className="bg-white p-10 rounded-[32px] border border-slate-200 hover:shadow-xl transition-all group h-full">
-            <div className="text-4xl mb-6">{f.icon}</div>
+            <div className="text-4xl mb-6">{icons[i]}</div>
             <h3 className="text-2xl font-bold mb-4 group-hover:text-blue-600 transition-colors">{f.title}</h3>
             <p className="text-slate-500 leading-relaxed">{f.description}</p>
           </div>
         );
 
-        return isVisionSpan ? (
+        return i === 0 ? (
           <Link key={i} to="/vision-span" className="block transform transition-transform hover:-translate-y-2">
             {content}
           </Link>

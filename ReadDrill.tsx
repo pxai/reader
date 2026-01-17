@@ -1,5 +1,17 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { 
+  ArrowLeft, 
+  Zap, 
+  RotateCcw, 
+  Play, 
+  MousePointer2, 
+  TrendingUp,
+  Timer,
+  ZapOff,
+  Gauge,
+  Rocket
+} from 'lucide-react';
 import { useWikipedia, WikipediaArticle } from './WikipediaContext';
 
 interface DrillMode {
@@ -7,13 +19,14 @@ interface DrillMode {
   title: string;
   description: string;
   speed: number;
+  icon?: React.ReactNode;
 }
 
 const DRILL_MODES: DrillMode[] = [
-  { id: 'normal', title: 'Normal drill', description: 'read at normal speed', speed: 1 },
-  { id: 'double', title: 'Double drill', description: 'read at x2 speed', speed: 2 },
-  { id: 'triple', title: 'Triple drill', description: 'read at x3 speed', speed: 3 },
-  { id: 'normal_2', title: 'Normal drill', description: 'read at normal speed', speed: 1 },
+  { id: 'normal', title: 'Normal drill', description: 'read at normal speed', speed: 1, icon: <Timer size={24} /> },
+  { id: 'double', title: 'Double drill', description: 'read at x2 speed', speed: 2, icon: <Zap size={24} /> },
+  { id: 'triple', title: 'Triple drill', description: 'read at x3 speed', speed: 3, icon: <Rocket size={24} /> },
+  { id: 'normal_2', title: 'Normal drill', description: 'read at normal speed', speed: 1, icon: <Gauge size={24} /> },
 ];
 
 const ReadDrill: React.FC = () => {
@@ -29,6 +42,7 @@ const ReadDrill: React.FC = () => {
   const [calculatedWPM, setCalculatedWPM] = useState<number | null>(null);
   const [currentArticle, setCurrentArticle] = useState<WikipediaArticle | null>(null);
   const [isAutoscrollActive, setIsAutoscrollActive] = useState(false);
+  const [scrollSpeed, setScrollSpeed] = useState(1);
   
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -81,10 +95,8 @@ const ReadDrill: React.FC = () => {
       if (lastTime !== undefined) {
         const deltaTime = (time - lastTime) / 1000; // in seconds
         
-        const currentMode = DRILL_MODES.find(m => m.id === selectedDrill);
-        const baseSpeedPPS = 10; // Pixels per second for 1x speed
-        const speedMultiplier = currentMode ? currentMode.speed : 1;
-        const scrollAmount = baseSpeedPPS * speedMultiplier * deltaTime;
+        const baseSpeedPPS = 20; // Pixels per second for 1x speed - reduced to half per user request
+        const scrollAmount = baseSpeedPPS * scrollSpeed * deltaTime;
 
         window.scrollBy({ top: scrollAmount, behavior: 'auto' });
       }
@@ -99,7 +111,7 @@ const ReadDrill: React.FC = () => {
     return () => {
       if (animationFrameId) cancelAnimationFrame(animationFrameId);
     };
-  }, [timerRunning, isAutoscrollActive, selectedDrill]);
+  }, [timerRunning, isAutoscrollActive, scrollSpeed]);
 
 
   const startDrill = () => {
@@ -170,7 +182,7 @@ const ReadDrill: React.FC = () => {
             onClick={() => navigate('/')}
             className="text-blue-600 font-bold hover:underline flex items-center gap-2"
           >
-            ← Back to Home
+            <ArrowLeft size={20} /> Back to Home
           </button>
         </div>
         
@@ -188,9 +200,14 @@ const ReadDrill: React.FC = () => {
                   : 'bg-white border-slate-200 hover:border-blue-300 hover:shadow-lg'
               }`}
             >
-              <h3 className={`text-lg font-black mb-1 ${selectedDrill === mode.id ? 'text-blue-600' : 'text-slate-900'}`}>
-                {mode.title}
-              </h3>
+              <div className="flex items-center gap-3 mb-2">
+                <div className={`${selectedDrill === mode.id ? 'text-blue-600' : 'text-slate-400 group-hover:text-blue-400'} transition-colors`}>
+                  {(mode as any).icon}
+                </div>
+                <h3 className={`text-lg font-black ${selectedDrill === mode.id ? 'text-blue-600' : 'text-slate-900'}`}>
+                  {mode.title}
+                </h3>
+              </div>
               <p className="text-sm text-slate-500 font-medium">{mode.description}</p>
             </button>
           ))}
@@ -204,34 +221,56 @@ const ReadDrill: React.FC = () => {
             {!timerRunning ? (
               <button 
                 onClick={startDrill}
-                className="px-10 py-4 bg-blue-600 text-white font-black rounded-2xl shadow-xl shadow-blue-600/20 hover:bg-blue-700 hover:scale-105 transition-all text-2xl"
+                className="px-10 py-4 bg-blue-600 text-white font-black rounded-2xl shadow-xl shadow-blue-600/20 hover:bg-blue-700 hover:scale-105 transition-all text-2xl flex items-center gap-3"
               >
+                {calculatedWPM ? <RotateCcw size={28} /> : <Play size={28} fill="currentColor" />}
                 {calculatedWPM ? 'RESTART' : 'START DRILL'}
               </button>
             ) : (
               <button 
                 onClick={resetDrill}
-                className="px-10 py-4 bg-slate-200 text-slate-600 font-black rounded-2xl hover:bg-slate-300 transition-all text-2xl"
+                className="px-10 py-4 bg-slate-200 text-slate-600 font-black rounded-2xl hover:bg-slate-300 transition-all text-2xl flex items-center gap-3"
               >
+                <RotateCcw size={28} />
                 RESET
               </button>
             )}
           </div>
           
-          <div className="flex items-center gap-3 bg-white p-2 rounded-xl border border-slate-200 shadow-sm">
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input 
-                type="checkbox" 
-                className="sr-only peer" 
-                checked={isAutoscrollActive}
-                onChange={(e) => setIsAutoscrollActive(e.target.checked)}
-              />
-              <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-300 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-              <span className="ml-3 text-sm font-bold text-slate-700">Autoscroll</span>
-            </label>
-            <span className="text-xs text-slate-400 font-medium px-2 py-1 bg-slate-100 rounded-md">
-               {parseFloat(DRILL_MODES.find(m => m.id === selectedDrill)?.speed.toFixed(2) || '0')}x speed
-            </span>
+          <div className="flex items-center gap-4">
+            {/* Autoscroll Toggle */}
+            <div className="flex items-center gap-3 bg-slate-50 p-2 rounded-xl border border-slate-200">
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input 
+                  type="checkbox" 
+                  className="sr-only peer" 
+                  checked={isAutoscrollActive}
+                  onChange={(e) => setIsAutoscrollActive(e.target.checked)}
+                />
+                <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                <span className="ml-2 text-sm font-bold text-slate-700 flex items-center gap-1.5 hidden sm:inline">
+                  <MousePointer2 size={16} />
+                  Autoscroll
+                </span>
+              </label>
+            </div>
+
+            {/* Speed Control */}
+            <div className="flex bg-slate-100 rounded-lg p-1">
+              {[1, 2, 3].map((s) => (
+                <button
+                  key={s}
+                  onClick={() => setScrollSpeed(s)}
+                  className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${
+                    scrollSpeed === s 
+                      ? 'bg-white text-blue-600 shadow-sm' 
+                      : 'text-slate-400 hover:text-slate-600'
+                  }`}
+                >
+                  {s}x
+                </button>
+              ))}
+            </div>
           </div>
 
           {calculatedWPM !== null && (
@@ -245,7 +284,7 @@ const ReadDrill: React.FC = () => {
                 onClick={() => navigate('/stats')}
                 className="text-blue-600 font-bold hover:underline flex items-center gap-2"
               >
-                View Progress →
+                View Progress <TrendingUp size={20} />
               </button>
             </div>
           )}

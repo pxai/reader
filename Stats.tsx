@@ -1,5 +1,6 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ArrowLeft, Activity, History, TrendingUp, Calendar, Zap } from 'lucide-react';
 import {
   LineChart,
   Line,
@@ -45,12 +46,15 @@ const Stats: React.FC = () => {
       <div className="max-w-6xl mx-auto">
         <div className="flex justify-between items-center mb-8 sticky top-24 bg-white/80 backdrop-blur-xl py-4 z-50 border-b border-slate-200 px-6 rounded-2xl shadow-sm">
           <button 
-            onClick={() => navigate('/read-drill')}
+            onClick={() => navigate('/')}
             className="text-blue-600 font-bold hover:underline flex items-center gap-2"
           >
-            ← Back to Read Drill
+            <ArrowLeft size={20} /> Back to Home
           </button>
-          <span className="text-slate-900 font-black text-xl">YOUR PROGRESS</span>
+          <div className="flex items-center gap-2">
+            <Activity className="text-blue-600" size={24} />
+            <span className="text-slate-900 font-black text-xl">YOUR PROGRESS</span>
+          </div>
         </div>
 
         <div className="bg-white p-6 md:p-10 rounded-[32px] shadow-xl border border-slate-100">
@@ -112,7 +116,8 @@ const Stats: React.FC = () => {
         {/* History Table */}
         {stats.length > 0 && (
            <div className="mt-12 bg-white rounded-[32px] shadow-xl border border-slate-100 overflow-hidden">
-             <div className="p-8 border-b border-slate-100">
+             <div className="p-8 border-b border-slate-100 flex items-center gap-3">
+                <History className="text-blue-600" size={28} />
                 <h3 className="text-2xl font-black text-slate-900">Drill History</h3>
              </div>
              <div className="overflow-x-auto">
@@ -126,19 +131,27 @@ const Stats: React.FC = () => {
                  </thead>
                  <tbody className="divide-y divide-slate-100">
                    {stats.slice().reverse().map((stat, i) => (
-                     <tr key={i} className="hover:bg-slate-50 transition-colors">
-                       <td className="px-8 py-4 font-medium text-slate-600">
-                         {new Date(stat.timestamp).toLocaleDateString()} <span className="text-slate-400 text-xs ml-2">{new Date(stat.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                       </td>
-                       <td className="px-8 py-4">
-                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-800 capitalize">
-                           {stat.type}
-                         </span>
-                       </td>
-                       <td className="px-8 py-4 text-right font-black text-slate-900">
-                         {stat.wpm}
-                       </td>
-                     </tr>
+                      <tr key={i} className="hover:bg-slate-50 transition-colors">
+                        <td className="px-8 py-4 font-medium text-slate-600">
+                          <div className="flex items-center gap-2">
+                            <Calendar size={14} className="text-slate-400" />
+                            {new Date(stat.timestamp).toLocaleDateString()}
+                            <span className="text-slate-400 text-xs ml-2">{new Date(stat.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                          </div>
+                        </td>
+                        <td className="px-8 py-4">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-800 capitalize gap-1.5">
+                            <Zap size={12} />
+                            {stat.type}
+                          </span>
+                        </td>
+                        <td className="px-8 py-4 text-right">
+                          <div className="flex items-center justify-end gap-2 font-black text-slate-900">
+                            <TrendingUp size={16} className="text-blue-600" />
+                            {stat.wpm}
+                          </div>
+                        </td>
+                      </tr>
                    ))}
                  </tbody>
                </table>
