@@ -65,7 +65,14 @@ const TrainingView: React.FC = () => {
   const { id, level } = useParams<{ id: string; level: string }>();
   const navigate = useNavigate();
   const [isAutoscrollActive, setIsAutoscrollActive] = useState(false);
+  const [isFlashActive, setIsFlashActive] = useState(false);
   const [scrollSpeed, setScrollSpeed] = useState(1);
+  const [currentFlashIndex, setCurrentFlashIndex] = useState(0);
+
+  // Reset indices when mode changes or exercise starts
+  useEffect(() => {
+    setCurrentFlashIndex(0);
+  }, [isFlashActive, id, level]);
 
   // Autoscroll logic
   useEffect(() => {
@@ -91,14 +98,14 @@ const TrainingView: React.FC = () => {
       animationFrameId = requestAnimationFrame(animate);
     };
 
-    if (isAutoscrollActive) {
+    if (isAutoscrollActive && !isFlashActive) {
       animationFrameId = requestAnimationFrame(animate);
     }
 
     return () => {
       if (animationFrameId) cancelAnimationFrame(animationFrameId);
     };
-  }, [isAutoscrollActive, scrollSpeed]);
+  }, [isAutoscrollActive, scrollSpeed, isFlashActive]);
 
   const lines = useMemo(() => {
     let chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -135,6 +142,30 @@ const TrainingView: React.FC = () => {
     return result;
   }, [id, level]);
 
+  // Flash logic
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout;
+
+    if (isFlashActive) {
+      const baseFlashDelay = 1000; // 1 second at 1x
+      const currentDelay = baseFlashDelay / scrollSpeed;
+
+      intervalId = setInterval(() => {
+        setCurrentFlashIndex(prev => {
+          if (prev >= lines.length - 1) {
+            setIsFlashActive(false);
+            return prev;
+          }
+          return prev + 1;
+        });
+      }, currentDelay);
+    }
+
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [isFlashActive, scrollSpeed, lines.length]);
+
   return (
     <div className="min-h-screen bg-white py-12 px-4 animate-in fade-in duration-500">
       <div className="max-w-4xl mx-auto">
@@ -169,6 +200,26 @@ const TrainingView: React.FC = () => {
               </label>
             </div>
 
+            {/* Flash Toggle */}
+            <div className="flex items-center gap-3 bg-slate-50 p-2 rounded-xl border border-slate-200">
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input 
+                  type="checkbox" 
+                  className="sr-only peer" 
+                  checked={isFlashActive}
+                  onChange={(e) => {
+                    setIsFlashActive(e.target.checked);
+                    if (e.target.checked) setIsAutoscrollActive(false);
+                  }}
+                />
+                <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+                <span className="ml-2 text-sm font-bold text-slate-700 flex items-center gap-1.5 hidden sm:inline">
+                  <Zap size={16} />
+                  Flash
+                </span>
+              </label>
+            </div>
+
             {/* Speed Control */}
             <div className="flex bg-slate-100 rounded-lg p-1">
               {[1, 2, 3].map((s) => (
@@ -188,10 +239,10 @@ const TrainingView: React.FC = () => {
           </div>
         </div>
         
-        <div className="flex flex-col items-center space-y-8 font-mono text-2xl md:text-4xl text-slate-800">
-          {lines.map((line, idx) => (
-            <div key={idx} className="flex justify-center w-full max-w-2xl px-4">
-              {line.map((item, iIdx) => (
+        <div className={`flex flex-col items-center space-y-8 font-mono text-2xl md:text-4xl text-slate-800 ${isFlashActive ? 'h-64 justify-center' : ''}`}>
+          {isFlashActive ? (
+            <div className="flex justify-center w-full max-w-2xl px-4 animate-in zoom-in duration-200">
+               {lines[currentFlashIndex].map((item: any, iIdx: number) => (
                 <span 
                   key={iIdx} 
                   className={`flex-1 text-center whitespace-pre ${
@@ -205,7 +256,25 @@ const TrainingView: React.FC = () => {
                 </span>
               ))}
             </div>
-          ))}
+          ) : (
+            lines.map((line, idx) => (
+              <div key={idx} className="flex justify-center w-full max-w-2xl px-4">
+                {line.map((item: any, iIdx: number) => (
+                  <span 
+                    key={iIdx} 
+                    className={`flex-1 text-center whitespace-pre ${
+                      id === '5' ? (
+                        (iIdx === 2 || iIdx === 5) ? 'ml-12 md:ml-20' : 
+                        (iIdx === 3 || iIdx === 4) ? 'ml-6 md:ml-10' : ''
+                      ) : ''
+                    }`}
+                  >
+                    {item}
+                  </span>
+                ))}
+              </div>
+            ))
+          )}
         </div>
         <div className="mt-20 text-center pb-20">
           <button 
