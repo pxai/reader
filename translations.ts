@@ -14,7 +14,7 @@ export const translations: Translations = {
       items: [
         { title: 'Vision Span', description: 'Interactive eye-tracking and peripheral vision exercises.', icon: '👁️' },
         { title: 'Read Drills', description: 'Practice reading efficiently with guided drills.', icon: '🌐' },
-        { title: 'Optimized SEO', description: 'Built with static performance in mind for search engine visibility.', icon: '🚀' }
+        { title: 'Grouping', description: 'Read long texts with vertical visual guides.', icon: '📏' }
       ]
     },
     contact: {
@@ -38,7 +38,7 @@ export const translations: Translations = {
       items: [
         { title: 'Vision Span', description: 'Ejercicios interactivos de seguimiento ocular y visión periférica.', icon: '👁️' },
         { title: 'Ejercicios de Lectura', description: 'Practica la lectura eficiente con ejercicios guiados.', icon: '🌐' },
-        { title: 'SEO Optimizado', description: 'Construido pensando en el rendimiento para visibilidad en buscadores.', icon: '🚀' }
+        { title: 'Agrupación', description: 'Lee textos largos con guías visuales verticales.', icon: '📏' }
       ]
     },
     contact: {
@@ -62,7 +62,7 @@ export const translations: Translations = {
       items: [
         { title: 'Vision Span', description: 'Exercices interactifs de poursuite oculaire et de vision périphérique.', icon: '👁️' },
         { title: 'Exercices de Lecture', description: 'Entraînez-vous à lire efficacement avec des exercices guidés.', icon: '🌐' },
-        { title: 'SEO Optimisé', description: 'Conçu pour la performance et la visibilité sur les moteurs de recherche.', icon: '🚀' }
+        { title: 'Groupement', description: 'Lisez des textes longs avec des guides visuels verticaux.', icon: '�' }
       ]
     },
     contact: {
@@ -86,7 +86,7 @@ export const translations: Translations = {
       items: [
         { title: 'Vision Span', description: 'Interaktive Augen-Tracking- und Peripheriesicht-Übungen.', icon: '👁️' },
         { title: 'Leseübungen', description: 'Üben Sie effizientes Lesen mit angeleiteten Übungen.', icon: '🌐' },
-        { title: 'SEO Optimiert', description: 'Optimiert für Suchmaschinen-Sichtbarkeit.', icon: '🚀' }
+        { title: 'Gruppierung', description: 'Lese lange Texte mit vertikalen visuellen Hilfslinien.', icon: '📏' }
       ]
     },
     contact: {

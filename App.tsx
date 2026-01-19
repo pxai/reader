@@ -4,6 +4,7 @@ import { HashRouter as Router, Routes, Route, Link, useParams, useNavigate } fro
 import { translations } from './translations';
 import { Language, TranslationContent } from './types';
 import ReadDrill from './ReadDrill';
+import Grouping from './Grouping';
 import Stats from './Stats';
 import { WikipediaProvider } from './WikipediaContext';
 import { 
@@ -17,7 +18,8 @@ import {
   ArrowLeft, 
   ChevronLeft,
   CheckCircle,
-  MousePointer2
+  MousePointer2,
+  Columns
 } from 'lucide-react';
 
 interface NavbarProps {
@@ -369,7 +371,7 @@ const Home: React.FC<HomeProps> = ({ t }) => (
 
     <section className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-8 py-20">
       {t.features.items.map((f: any, i: number) => {
-        const icons = [<Eye size={40} className="text-blue-600" />, <Zap size={40} className="text-blue-600" />, <BookOpen size={40} className="text-blue-600" />];
+        const icons = [<Eye size={40} className="text-blue-600" />, <Zap size={40} className="text-blue-600" />, <Columns size={40} className="text-blue-600" />];
         const content = (
           <div className="bg-white p-10 rounded-[32px] border border-slate-200 hover:shadow-xl transition-all group h-full">
             <div className="text-4xl mb-6">{icons[i]}</div>
@@ -387,7 +389,9 @@ const Home: React.FC<HomeProps> = ({ t }) => (
             {content}
           </Link>
         ) : (
-          <div key={i}>{content}</div>
+          <Link key={i} to="/grouping" className="block transform transition-transform hover:-translate-y-2">
+            {content}
+          </Link>
         );
       })}
     </section>
@@ -419,6 +423,7 @@ const App: React.FC = () => {
               <Route path="/vision-span/exercise/:id/level/:level" element={<TrainingView />} />
               <Route path="/about" element={<div className="py-20 text-center text-4xl font-black">{t.nav.about}</div>} />
               <Route path="/read-drill" element={<ReadDrill />} />
+              <Route path="/grouping" element={<Grouping />} />
               <Route path="/stats" element={<Stats />} />
               <Route path="/contact" element={<div className="py-20 text-center text-4xl font-black">{t.contact.title}</div>} />
             </Routes>
