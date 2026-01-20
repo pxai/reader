@@ -11,8 +11,8 @@ export const translations = {
       title: 'Our Core Features',
       items: [
         { title: 'Vision Span', description: 'Interactive eye-tracking and peripheral vision exercises.', icon: '👁️' },
-        { title: 'Multilang Ready', description: 'Seamlessly switch between languages with zero page reloads.', icon: '🌐' },
-        { title: 'Optimized SEO', description: 'Built with static performance in mind for search engine visibility.', icon: '🚀' }
+        { title: 'Read Drills', description: 'Read long texts with vertical visual guides.', icon: '📖' },
+        { title: 'Grouping', description: 'Read long texts with vertical visual guides.', icon: '📏' }
       ]
     },
     contact: {
@@ -35,8 +35,8 @@ export const translations = {
       title: 'Nuestras Características',
       items: [
         { title: 'Vision Span', description: 'Ejercicios interactivos de seguimiento ocular y visión periférica.', icon: '👁️' },
-        { title: 'Listo para Varios Idiomas', description: 'Cambia entre idiomas sin recargar la página.', icon: '🌐' },
-        { title: 'SEO Optimizado', description: 'Construido pensando en el rendimiento para visibilidad en buscadores.', icon: '🚀' }
+        { title: 'Read Drills', description: 'Lectura de textos largos con guías visuales verticales.', icon: '📖' },
+        { title: 'Grouping', description: 'Lectura de textos largos con guías visuales verticales.', icon: '📏' }
       ]
     },
     contact: {
@@ -59,8 +59,8 @@ export const translations = {
       title: 'Nos Fonctionnalités',
       items: [
         { title: 'Vision Span', description: 'Exercices interactifs de poursuite oculaire et de vision périphérique.', icon: '👁️' },
-        { title: 'Prêt pour le Multilingue', description: 'Changez de langue sans recharger la page.', icon: '🌐' },
-        { title: 'SEO Optimisé', description: 'Conçu pour la performance et la visibilité sur les moteurs de recherche.', icon: '🚀' }
+        { title: 'Read Drills', description: 'Lectura de textos largos con guías visuales verticales.', icon: '📖' },
+        { title: 'Grouping', description: 'Lectura de textos largos con guías visuales verticales.', icon: '📏' }
       ]
     },
     contact: {
