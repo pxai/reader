@@ -1,4 +1,4 @@
-# 🌍 Polyglot Reader (React)
+# 🌍 Reader (React)
 
 Automated build and deployment via GitHub Actions.
 

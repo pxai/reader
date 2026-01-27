@@ -71,9 +71,10 @@ const TrainingView: React.FC = () => {
   const [scrollSpeed, setScrollSpeed] = useState(1);
   const [currentFlashIndex, setCurrentFlashIndex] = useState(0);
 
-  // Reset indices when mode changes or exercise starts
+  // Reset indices and scroll to top when mode changes or exercise starts
   useEffect(() => {
     setCurrentFlashIndex(0);
+    window.scrollTo(0, 0);
   }, [isFlashActive, id, level]);
 
   // Autoscroll logic
@@ -249,8 +250,7 @@ const TrainingView: React.FC = () => {
                   key={iIdx} 
                   className={`flex-1 text-center whitespace-pre ${
                     id === '5' ? (
-                      (iIdx === 2 || iIdx === 5) ? 'ml-12 md:ml-20' : 
-                      (iIdx === 3 || iIdx === 4) ? 'ml-6 md:ml-10' : ''
+                      iIdx !== 0 ? 'ml-[34px] md:ml-[66px]' : ''
                     ) : ''
                   }`}
                 >
@@ -266,8 +266,7 @@ const TrainingView: React.FC = () => {
                     key={iIdx} 
                     className={`flex-1 text-center whitespace-pre ${
                       id === '5' ? (
-                        (iIdx === 2 || iIdx === 5) ? 'ml-12 md:ml-20' : 
-                        (iIdx === 3 || iIdx === 4) ? 'ml-6 md:ml-10' : ''
+                        iIdx !== 0 ? 'ml-[34px] md:ml-[66px]' : ''
                       ) : ''
                     }`}
                   >
@@ -278,14 +277,38 @@ const TrainingView: React.FC = () => {
             ))
           )}
         </div>
-        <div className="mt-20 text-center pb-20">
+        <div className="mt-20 flex flex-col sm:flex-row justify-center items-center gap-4 pb-20">
           <button 
              onClick={() => navigate(`/vision-span/exercise/${id}`)}
-             className="px-8 py-4 bg-slate-900 text-white font-bold rounded-xl flex items-center gap-3 mx-auto"
+             className="px-8 py-4 bg-slate-200 text-slate-900 font-bold rounded-xl flex items-center gap-3"
           >
             <CheckCircle size={24} />
             Finish Exercise
           </button>
+          {(() => {
+            const nextId = parseInt(id || '1');
+            const nextLevel = parseInt(level || '1');
+            let nextPath = null;
+
+            if (nextLevel < 3) {
+              nextPath = `/vision-span/exercise/${nextId}/level/${nextLevel + 1}`;
+            } else if (nextId < 5) {
+              nextPath = `/vision-span/exercise/${nextId + 1}/level/1`;
+            }
+
+            if (nextPath) {
+              return (
+                <button 
+                   onClick={() => navigate(nextPath!)}
+                   className="px-8 py-4 bg-slate-900 text-white font-bold rounded-xl flex items-center gap-3"
+                >
+                  Finish and go to Next
+                  <ArrowLeft size={24} className="rotate-180" />
+                </button>
+              );
+            }
+            return null;
+          })()}
         </div>
       </div>
     </div>
@@ -357,21 +380,23 @@ interface HomeProps {
 
 const Home: React.FC<HomeProps> = ({ t }) => (
   <div className="animate-in fade-in duration-700">
-    <header className="py-24 text-center">
+    <header className="pt-20 pb-0 text-center">
       <h1 className="text-6xl md:text-8xl font-black text-slate-900 mb-8 tracking-tight">
         {t.hero.title}
       </h1>
-      <p className="max-w-2xl mx-auto text-xl text-slate-500 mb-12 leading-relaxed">
+      <p className="max-w-2xl mx-auto text-xl text-slate-500 mb-0 leading-relaxed">
         {t.hero.subtitle}
       </p>
-      <Link to="/vision-span" className="px-12 py-5 bg-blue-600 text-white font-black rounded-2xl shadow-2xl shadow-blue-600/20 hover:bg-blue-700 transition-all hover:-translate-y-1 inline-block">
-        {t.hero.cta}
-      </Link>
     </header>
 
-    <section className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-8 py-20">
+    <section className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-8 pt-10 pb-20">
       {t.features.items.map((f: any, i: number) => {
-        const icons = [<Eye size={40} className="text-blue-600" />, <Zap size={40} className="text-blue-600" />, <Columns size={40} className="text-blue-600" />];
+        // Updated icons order: Vision Span (Eye), Grouping (Columns), Read Drills (Zap/Book)
+        // Grouping uses Columns, Read Drills uses BookOpen or similar (keeping existing Zap for now or swapping?)
+        // The original had: Eye, Zap, Columns.
+        // New order: Vision Span (Eye), Grouping (Columns), Read Drills (Zap/Book)
+        // Let's match the icons: 0=Eye, 1=Columns, 2=BookOpen/Zap
+        const icons = [<Columns size={40} className="text-blue-600" />, <BookOpen size={40} className="text-blue-600" />, <Eye size={40} className="text-blue-600" />];
         const content = (
           <div className="bg-white p-10 rounded-[32px] border border-slate-200 hover:shadow-xl transition-all group h-full">
             <div className="text-4xl mb-6">{icons[i]}</div>
@@ -381,7 +406,7 @@ const Home: React.FC<HomeProps> = ({ t }) => (
         );
 
         return i === 0 ? (
-          <Link key={i} to="/vision-span" className="block transform transition-transform hover:-translate-y-2">
+          <Link key={i} to="/grouping" className="block transform transition-transform hover:-translate-y-2">
             {content}
           </Link>
         ) : i === 1 ? (
@@ -389,7 +414,7 @@ const Home: React.FC<HomeProps> = ({ t }) => (
             {content}
           </Link>
         ) : (
-          <Link key={i} to="/grouping" className="block transform transition-transform hover:-translate-y-2">
+          <Link key={i} to="/vision-span" className="block transform transition-transform hover:-translate-y-2">
             {content}
           </Link>
         );
@@ -429,7 +454,7 @@ const App: React.FC = () => {
             </Routes>
           </main>
           <footer className="py-12 text-center text-slate-400 font-medium border-t border-slate-200">
-             © {new Date().getFullYear()} POLYGLOT. {t.footer.rights}
+             © {new Date().getFullYear()} Reader. {t.footer.rights}
           </footer>
         </div>
       </Router>

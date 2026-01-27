@@ -12,9 +12,9 @@ export const translations: Translations = {
     features: {
       title: 'Our Core Features',
       items: [
-        { title: 'Vision Span', description: 'Interactive eye-tracking and peripheral vision exercises.', icon: '👁️' },
+        { title: 'Grouping', description: 'Read long texts with vertical visual guides.', icon: '📏' },
         { title: 'Read Drills', description: 'Practice reading efficiently with guided drills.', icon: '🌐' },
-        { title: 'Grouping', description: 'Read long texts with vertical visual guides.', icon: '📏' }
+        { title: 'Vision Span', description: 'Interactive eye-tracking and peripheral vision exercises.', icon: '👁️' }
       ]
     },
     contact: {
@@ -36,9 +36,9 @@ export const translations: Translations = {
     features: {
       title: 'Nuestras Características',
       items: [
-        { title: 'Vision Span', description: 'Ejercicios interactivos de seguimiento ocular y visión periférica.', icon: '👁️' },
+        { title: 'Agrupación', description: 'Lee textos largos con guías visuales verticales.', icon: '📏' },
         { title: 'Ejercicios de Lectura', description: 'Practica la lectura eficiente con ejercicios guiados.', icon: '🌐' },
-        { title: 'Agrupación', description: 'Lee textos largos con guías visuales verticales.', icon: '📏' }
+        { title: 'Vision Span', description: 'Ejercicios interactivos de seguimiento ocular y visión periférica.', icon: '👁️' }
       ]
     },
     contact: {
@@ -60,9 +60,9 @@ export const translations: Translations = {
     features: {
       title: 'Nos Fonctionnalités',
       items: [
-        { title: 'Vision Span', description: 'Exercices interactifs de poursuite oculaire et de vision périphérique.', icon: '👁️' },
+        { title: 'Groupement', description: 'Lisez des textes longs avec des guides visuels verticaux.', icon: '📏' },
         { title: 'Exercices de Lecture', description: 'Entraînez-vous à lire efficacement avec des exercices guidés.', icon: '🌐' },
-        { title: 'Groupement', description: 'Lisez des textes longs avec des guides visuels verticaux.', icon: '�' }
+        { title: 'Vision Span', description: 'Exercices interactifs de poursuite oculaire et de vision périphérique.', icon: '👁️' }
       ]
     },
     contact: {
@@ -84,9 +84,9 @@ export const translations: Translations = {
     features: {
       title: 'Unsere Funktionen',
       items: [
-        { title: 'Vision Span', description: 'Interaktive Augen-Tracking- und Peripheriesicht-Übungen.', icon: '👁️' },
+        { title: 'Gruppierung', description: 'Lese lange Texte mit vertikalen visuellen Hilfslinien.', icon: '📏' },
         { title: 'Leseübungen', description: 'Üben Sie effizientes Lesen mit angeleiteten Übungen.', icon: '🌐' },
-        { title: 'Gruppierung', description: 'Lese lange Texte mit vertikalen visuellen Hilfslinien.', icon: '📏' }
+        { title: 'Vision Span', description: 'Interaktive Augen-Tracking- und Peripheriesicht-Übungen.', icon: '👁️' }
       ]
     },
     contact: {

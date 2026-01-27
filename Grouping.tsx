@@ -26,15 +26,27 @@ const Grouping: React.FC = () => {
   useEffect(() => {
     let animationFrameId: number;
     let lastTime: number;
+    let scrollAccumulator = 0;
 
     const animate = (time: number) => {
       if (lastTime !== undefined) {
         const deltaTime = (time - lastTime) / 1000; // in seconds
         
-        const baseSpeedPPS = 40; // Pixels per second for 1x speed - matched VisionSpan speed
-        const scrollAmount = baseSpeedPPS * scrollSpeed * deltaTime;
+        const speedMapping: Record<number, number> = {
+          1: 25,
+          2: 37.5, // Reduced from 75 by half
+          3: 100
+        };
+        const pixelsPerSecond = speedMapping[scrollSpeed] || 50;
+        const scrollAmount = pixelsPerSecond * deltaTime;
+        
+        scrollAccumulator += scrollAmount;
 
-        window.scrollBy({ top: scrollAmount, behavior: 'auto' });
+        if (scrollAccumulator >= 1) {
+          const pixelsToScroll = Math.floor(scrollAccumulator);
+          window.scrollBy({ top: pixelsToScroll, behavior: 'auto' });
+          scrollAccumulator -= pixelsToScroll;
+        }
         
         // Stop if we've reached the bottom
         if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight) {
@@ -119,10 +131,10 @@ const Grouping: React.FC = () => {
           {/* Vertical Guides */}
           <div className="absolute inset-0 pointer-events-none z-10 flex justify-center">
             <div className="w-full max-w-3xl flex justify-between h-full px-4 md:px-0">
-               {/* Left guide at ~1/3 */}
-               <div className="absolute left-1/4 md:left-1/3 top-20 bottom-20 w-0.5 bg-blue-200/80 shadow-[0_0_12px_rgba(37,99,235,0.3)]" />
-               {/* Right guide at ~2/3 */}
-               <div className="absolute right-1/4 md:right-1/3 top-20 bottom-20 w-0.5 bg-blue-200/80 shadow-[0_0_12px_rgba(37,99,235,0.3)]" />
+               {/* Left guide at ~38% (was ~33%) */}
+               <div className="absolute left-[30%] md:left-[36%] top-20 bottom-20 w-0.5 bg-blue-200/80 shadow-[0_0_12px_rgba(37,99,235,0.3)]" />
+               {/* Right guide at ~38% from right (was ~33%) */}
+               <div className="absolute right-[30%] md:right-[36%] top-20 bottom-20 w-0.5 bg-blue-200/80 shadow-[0_0_12px_rgba(37,99,235,0.3)]" />
             </div>
           </div>
 
