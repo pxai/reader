@@ -10,7 +10,8 @@ import {
   Timer,
   ZapOff,
   Gauge,
-  Rocket
+  Rocket,
+  Columns
 } from 'lucide-react';
 import { useWikipedia, WikipediaArticle } from './WikipediaContext';
 
@@ -43,8 +44,10 @@ const ReadDrill: React.FC = () => {
   const [currentArticle, setCurrentArticle] = useState<WikipediaArticle | null>(null);
   const [isAutoscrollActive, setIsAutoscrollActive] = useState(false);
   const [scrollSpeed, setScrollSpeed] = useState(1);
+  const [showVerticalLines, setShowVerticalLines] = useState(false);
   
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const scrollAccumulatorRef = useRef(0);
 
   // Set initial article or fallback
   useEffect(() => {
@@ -95,10 +98,16 @@ const ReadDrill: React.FC = () => {
       if (lastTime !== undefined) {
         const deltaTime = (time - lastTime) / 1000; // in seconds
         
-        const baseSpeedPPS = 20; // Pixels per second for 1x speed - reduced to half per user request
+        const baseSpeedPPS = 30; // Increased base speed
         const scrollAmount = baseSpeedPPS * scrollSpeed * deltaTime;
 
-        window.scrollBy({ top: scrollAmount, behavior: 'auto' });
+        scrollAccumulatorRef.current += scrollAmount;
+
+        if (scrollAccumulatorRef.current >= 1) {
+          const pixelsToScroll = Math.floor(scrollAccumulatorRef.current);
+          window.scrollBy({ top: pixelsToScroll, behavior: 'auto' });
+          scrollAccumulatorRef.current -= pixelsToScroll;
+        }
       }
       lastTime = time;
       animationFrameId = requestAnimationFrame(animate);
@@ -121,6 +130,7 @@ const ReadDrill: React.FC = () => {
     setShowText(true);
     setCalculatedWPM(null);
     setShowInstruction(false);
+    scrollAccumulatorRef.current = 0;
   };
 
   const resetDrill = () => {
@@ -131,6 +141,7 @@ const ReadDrill: React.FC = () => {
     setCalculatedWPM(null);
     setShowInstruction(false);
     if (timerRef.current) clearInterval(timerRef.current);
+    scrollAccumulatorRef.current = 0;
     window.scrollTo({ top: 0, behavior: 'smooth' });
     
     // Switch to next article if we are resetting after a finished drill
@@ -192,6 +203,7 @@ const ReadDrill: React.FC = () => {
               key={mode.id}
               onClick={() => {
                 setSelectedDrill(mode.id);
+                setScrollSpeed(mode.speed); // Sync scroll speed with selected drill
                 resetDrill();
               }}
               className={`p-6 rounded-[24px] border-2 transition-all text-left group ${
@@ -236,8 +248,27 @@ const ReadDrill: React.FC = () => {
               </button>
             )}
           </div>
-          
+
           <div className="flex items-center gap-4">
+            {/* Vertical Lines Toggle */}
+            <div className="flex items-center gap-3 bg-slate-50 p-2 rounded-xl border border-slate-200">
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input 
+                  type="checkbox" 
+                  className="sr-only peer" 
+                  checked={showVerticalLines}
+                  onChange={(e) => setShowVerticalLines(e.target.checked)}
+                />
+                <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                <span className="ml-2 text-sm font-bold text-slate-700 flex items-center gap-1.5 hidden sm:inline">
+                  <Columns size={16} />
+                  Vertical Lines
+                </span>
+              </label>
+            </div>
+
+
+
             {/* Autoscroll Toggle */}
             <div className="flex items-center gap-3 bg-slate-50 p-2 rounded-xl border border-slate-200">
               <label className="relative inline-flex items-center cursor-pointer">
@@ -255,21 +286,26 @@ const ReadDrill: React.FC = () => {
               </label>
             </div>
 
-            {/* Speed Control */}
-            <div className="flex bg-slate-100 rounded-lg p-1">
-              {[1, 2, 3].map((s) => (
-                <button
-                  key={s}
-                  onClick={() => setScrollSpeed(s)}
-                  className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${
-                    scrollSpeed === s 
-                      ? 'bg-white text-blue-600 shadow-sm' 
-                      : 'text-slate-400 hover:text-slate-600'
-                  }`}
-                >
-                  {s}x
-                </button>
-              ))}
+            {/* Speed Slider Control */}
+            <div className="flex flex-col gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200 min-w-[200px]">
+              <div className="flex justify-between items-center text-xs font-black text-slate-500 uppercase tracking-widest">
+                <span>Speed</span>
+                <span className="text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md">{scrollSpeed.toFixed(1)}x</span>
+              </div>
+              <input 
+                type="range" 
+                min="0.5" 
+                max="5.0" 
+                step="0.1" 
+                value={scrollSpeed}
+                onChange={(e) => setScrollSpeed(parseFloat(e.target.value))}
+                className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+              />
+              <div className="flex justify-between text-[10px] text-slate-400 font-bold">
+                <span>0.5x</span>
+                <span>2.5x</span>
+                <span>5.0x</span>
+              </div>
             </div>
           </div>
 
@@ -307,6 +343,16 @@ const ReadDrill: React.FC = () => {
                  <span className="text-2xl">🌍</span>
                  <div className="h-px w-20 bg-slate-900" />
               </div>
+              
+              {showVerticalLines && (
+                <div className="absolute inset-0 pointer-events-none z-10 flex justify-center">
+                  <div className="w-full max-w-3xl flex justify-between h-full px-4 md:px-0">
+                    <div className="absolute left-[30%] md:left-[36%] top-20 bottom-20 w-0.5 bg-blue-200/80 shadow-[0_0_12px_rgba(37,99,235,0.3)]" />
+                    <div className="absolute right-[30%] md:right-[36%] top-20 bottom-20 w-0.5 bg-blue-200/80 shadow-[0_0_12px_rgba(37,99,235,0.3)]" />
+                  </div>
+                </div>
+              )}
+
               <div className={`text-xl md:text-2xl text-slate-700 leading-[2.2] text-justify font-serif transition-all ${isFinished && !calculatedWPM ? 'cursor-pointer' : ''}`}>
                 {wordsWithMetadata.map((segment, sIdx) => {
                   const Tag = segment.type;
