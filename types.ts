@@ -13,6 +13,7 @@ export interface TranslationContent {
     about: string;
     contact: string;
     progress: string;
+    settings: string;
   };
   hero: {
     title: string;

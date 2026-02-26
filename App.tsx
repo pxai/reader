@@ -6,6 +6,8 @@ import { Language, TranslationContent } from './types';
 import ReadDrill from './ReadDrill';
 import Grouping from './Grouping';
 import Stats from './Stats';
+import Settings from './Settings';
+import { SettingsProvider } from './SettingsContext';
 import { WikipediaProvider } from './WikipediaContext';
 import { 
   Home as HomeIcon, 
@@ -19,7 +21,8 @@ import {
   ChevronLeft,
   CheckCircle,
   MousePointer2,
-  Columns
+  Columns,
+  Settings as SettingsIcon
 } from 'lucide-react';
 
 interface NavbarProps {
@@ -45,6 +48,9 @@ const Navbar: React.FC<NavbarProps> = ({ t, currentLang, setLang }) => (
         <Link to="/contact" className="hover:text-blue-600 transition-colors flex items-center gap-2">
           <Mail size={18} /> {t.nav.contact}
         </Link>
+        <Link to="/settings" className="hover:text-blue-600 transition-colors flex items-center gap-2">
+          <SettingsIcon size={18} /> {t.nav.settings}
+        </Link>
       </div>
       <div className="flex gap-2 bg-slate-100 p-1 rounded-xl">
         {Object.values(Language).map((l) => (
@@ -67,15 +73,17 @@ const TrainingView: React.FC = () => {
   const { id, level } = useParams<{ id: string; level: string }>();
   const navigate = useNavigate();
   const [isAutoscrollActive, setIsAutoscrollActive] = useState(false);
-  const [isFlashActive, setIsFlashActive] = useState(false);
+  const [flashMode, setFlashMode] = useState<0 | 1 | 2 | 3>(0);
   const [scrollSpeed, setScrollSpeed] = useState(1);
   const [currentFlashIndex, setCurrentFlashIndex] = useState(0);
+  const [isCompleted, setIsCompleted] = useState(false);
 
   // Reset indices and scroll to top when mode changes or exercise starts
   useEffect(() => {
     setCurrentFlashIndex(0);
+    setIsCompleted(false);
     window.scrollTo(0, 0);
-  }, [isFlashActive, id, level]);
+  }, [flashMode, id, level]);
 
   // Autoscroll logic
   useEffect(() => {
@@ -101,14 +109,14 @@ const TrainingView: React.FC = () => {
       animationFrameId = requestAnimationFrame(animate);
     };
 
-    if (isAutoscrollActive && !isFlashActive) {
+    if (isAutoscrollActive && flashMode === 0) {
       animationFrameId = requestAnimationFrame(animate);
     }
 
     return () => {
       if (animationFrameId) cancelAnimationFrame(animationFrameId);
     };
-  }, [isAutoscrollActive, scrollSpeed, isFlashActive]);
+  }, [isAutoscrollActive, scrollSpeed, flashMode]);
 
   const lines = useMemo(() => {
     let chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -149,17 +157,18 @@ const TrainingView: React.FC = () => {
   useEffect(() => {
     let intervalId: NodeJS.Timeout;
 
-    if (isFlashActive) {
+    if (flashMode > 0) {
       const baseFlashDelay = 1000; // 1 second at 1x
       const currentDelay = baseFlashDelay / scrollSpeed;
 
       intervalId = setInterval(() => {
         setCurrentFlashIndex(prev => {
-          if (prev >= lines.length - 1) {
-            setIsFlashActive(false);
+          if (prev >= lines.length - flashMode) {
+            setFlashMode(0);
+            setIsCompleted(true);
             return prev;
           }
-          return prev + 1;
+          return prev + flashMode;
         });
       }, currentDelay);
     }
@@ -167,7 +176,40 @@ const TrainingView: React.FC = () => {
     return () => {
       if (intervalId) clearInterval(intervalId);
     };
-  }, [isFlashActive, scrollSpeed, lines.length]);
+  }, [flashMode, scrollSpeed, lines.length]);
+
+  const ExerciseNavigation = () => {
+    const nextId = parseInt(id || '1');
+    const nextLevel = parseInt(level || '1');
+    let nextPath = null;
+
+    if (nextLevel < 3) {
+      nextPath = `/vision-span/exercise/${nextId}/level/${nextLevel + 1}`;
+    } else if (nextId < 5) {
+      nextPath = `/vision-span/exercise/${nextId + 1}/level/1`;
+    }
+
+    return (
+      <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
+        <button 
+           onClick={() => navigate(`/vision-span/exercise/${id}`)}
+           className="px-8 py-4 bg-slate-200 text-slate-900 font-bold rounded-xl flex items-center gap-3 w-full sm:w-auto"
+        >
+          <CheckCircle size={24} />
+          Finish Exercise
+        </button>
+        {nextPath && (
+          <button 
+             onClick={() => navigate(nextPath)}
+             className="px-8 py-4 bg-slate-900 text-white font-bold rounded-xl flex items-center gap-3 w-full sm:w-auto"
+          >
+            Finish and go to Next
+            <ArrowLeft size={24} className="rotate-180" />
+          </button>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-white py-12 px-4 animate-in fade-in duration-500">
@@ -203,24 +245,29 @@ const TrainingView: React.FC = () => {
               </label>
             </div>
 
-            {/* Flash Toggle */}
-            <div className="flex items-center gap-3 bg-slate-50 p-2 rounded-xl border border-slate-200">
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input 
-                  type="checkbox" 
-                  className="sr-only peer" 
-                  checked={isFlashActive}
-                  onChange={(e) => {
-                    setIsFlashActive(e.target.checked);
-                    if (e.target.checked) setIsAutoscrollActive(false);
+            {/* Flash Buttons */}
+            <div className="flex items-center gap-2 bg-slate-50 p-2 rounded-xl border border-slate-200">
+              {[1, 2, 3].map((mode) => (
+                <button
+                  key={mode}
+                  onClick={() => {
+                    if (flashMode === mode) {
+                      setFlashMode(0);
+                    } else {
+                      setFlashMode(mode as 1 | 2 | 3);
+                      setIsAutoscrollActive(false);
+                    }
                   }}
-                />
-                <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
-                <span className="ml-2 text-sm font-bold text-slate-700 flex items-center gap-1.5 hidden sm:inline">
-                  <Zap size={16} />
-                  Flash
-                </span>
-              </label>
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 transition-all ${
+                    flashMode === mode 
+                      ? 'bg-amber-500 text-white shadow-sm' 
+                      : 'text-slate-600 hover:bg-slate-200'
+                  }`}
+                >
+                  <Zap size={14} />
+                  {mode === 1 ? 'Flash' : `Flash ${mode}`}
+                </button>
+              ))}
             </div>
 
             {/* Speed Control */}
@@ -242,21 +289,32 @@ const TrainingView: React.FC = () => {
           </div>
         </div>
         
-        <div className={`flex flex-col items-center space-y-8 font-mono text-2xl md:text-4xl text-slate-800 ${isFlashActive ? 'h-64 justify-center' : ''}`}>
-          {isFlashActive ? (
-            <div className="flex justify-center w-full max-w-2xl px-4 animate-in zoom-in duration-200">
-               {lines[currentFlashIndex].map((item: any, iIdx: number) => (
-                <span 
-                  key={iIdx} 
-                  className={`flex-1 text-center whitespace-pre ${
-                    id === '5' ? (
-                      iIdx !== 0 ? 'ml-[34px] md:ml-[66px]' : ''
-                    ) : ''
-                  }`}
-                >
-                  {item}
-                </span>
-              ))}
+        <div className={`flex flex-col items-center space-y-8 font-mono text-2xl md:text-4xl text-slate-800 ${flashMode > 0 || isCompleted ? 'h-64 justify-center' : ''}`}>
+          {isCompleted ? (
+            <div className="flex flex-col items-center gap-8">
+              <div className="text-slate-300 font-black uppercase tracking-[0.2em] animate-pulse">
+                Exercise Completed
+              </div>
+              <ExerciseNavigation />
+            </div>
+          ) : flashMode > 0 ? (
+            <div className="flex flex-col items-center w-full max-w-2xl px-4 animate-in zoom-in duration-200 gap-8">
+               {lines.slice(currentFlashIndex, currentFlashIndex + flashMode).map((line: any[], lineIdx: number) => (
+                 <div key={lineIdx} className="flex justify-center w-full">
+                    {line.map((item: any, iIdx: number) => (
+                      <span 
+                        key={iIdx} 
+                        className={`flex-1 text-center whitespace-pre ${
+                          id === '5' ? (
+                            iIdx !== 0 ? 'ml-[34px] md:ml-[66px]' : ''
+                          ) : ''
+                        }`}
+                      >
+                        {item}
+                      </span>
+                    ))}
+                 </div>
+               ))}
             </div>
           ) : (
             lines.map((line, idx) => (
@@ -277,38 +335,8 @@ const TrainingView: React.FC = () => {
             ))
           )}
         </div>
-        <div className="mt-20 flex flex-col sm:flex-row justify-center items-center gap-4 pb-20">
-          <button 
-             onClick={() => navigate(`/vision-span/exercise/${id}`)}
-             className="px-8 py-4 bg-slate-200 text-slate-900 font-bold rounded-xl flex items-center gap-3"
-          >
-            <CheckCircle size={24} />
-            Finish Exercise
-          </button>
-          {(() => {
-            const nextId = parseInt(id || '1');
-            const nextLevel = parseInt(level || '1');
-            let nextPath = null;
-
-            if (nextLevel < 3) {
-              nextPath = `/vision-span/exercise/${nextId}/level/${nextLevel + 1}`;
-            } else if (nextId < 5) {
-              nextPath = `/vision-span/exercise/${nextId + 1}/level/1`;
-            }
-
-            if (nextPath) {
-              return (
-                <button 
-                   onClick={() => navigate(nextPath!)}
-                   className="px-8 py-4 bg-slate-900 text-white font-bold rounded-xl flex items-center gap-3"
-                >
-                  Finish and go to Next
-                  <ArrowLeft size={24} className="rotate-180" />
-                </button>
-              );
-            }
-            return null;
-          })()}
+        <div className="mt-20 pb-20">
+          <ExerciseNavigation />
         </div>
       </div>
     </div>
@@ -436,6 +464,7 @@ const App: React.FC = () => {
   const t = translations[lang];
 
   return (
+    <SettingsProvider>
     <WikipediaProvider>
       <Router>
         <div className="min-h-screen bg-slate-50 selection:bg-blue-100 selection:text-blue-900">
@@ -450,6 +479,7 @@ const App: React.FC = () => {
               <Route path="/read-drill" element={<ReadDrill />} />
               <Route path="/grouping" element={<Grouping />} />
               <Route path="/stats" element={<Stats />} />
+              <Route path="/settings" element={<Settings />} />
               <Route path="/contact" element={<div className="py-20 text-center text-4xl font-black">{t.contact.title}</div>} />
             </Routes>
           </main>
@@ -459,6 +489,7 @@ const App: React.FC = () => {
         </div>
       </Router>
     </WikipediaProvider>
+    </SettingsProvider>
   );
 };
 

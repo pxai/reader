@@ -3,7 +3,7 @@ import { Translations, Language } from './types';
 
 export const translations: Translations = {
   [Language.EN]: {
-    nav: { home: 'Home', features: 'Features', about: 'About', contact: 'Contact', progress: 'Progress' },
+    nav: { home: 'Home', features: 'Features', about: 'About', contact: 'Contact', progress: 'Progress', settings: 'Settings' },
     hero: {
       title: 'Read Faster and Better',
       subtitle: 'Improve your reading speed and retention with these daily exercises',
@@ -27,7 +27,7 @@ export const translations: Translations = {
     footer: { rights: 'All rights reserved.', language: 'Language' }
   },
   [Language.ES]: {
-    nav: { home: 'Inicio', features: 'Características', about: 'Nosotros', contact: 'Contacto', progress: 'Progreso' },
+    nav: { home: 'Inicio', features: 'Características', about: 'Nosotros', contact: 'Contacto', progress: 'Progreso', settings: 'Ajustes' },
     hero: {
       title: 'Lee más rápido y mejor',
       subtitle: 'Mejora tu velocidad de lectura y retención con estos ejercicios diarios',
@@ -51,7 +51,7 @@ export const translations: Translations = {
     footer: { rights: 'Todos los derechos reservados.', language: 'Idioma' }
   },
   [Language.FR]: {
-    nav: { home: 'Accueil', features: 'Fonctionnalités', about: 'À Propos', contact: 'Contact', progress: 'Progrès' },
+    nav: { home: 'Accueil', features: 'Fonctionnalités', about: 'À Propos', contact: 'Contact', progress: 'Progrès', settings: 'Paramètres' },
     hero: {
       title: 'Lisez plus vite et mieux',
       subtitle: 'Améliorez votre vitesse de lecture et votre mémorisation grâce à ces exercices quotidiens',
@@ -75,7 +75,7 @@ export const translations: Translations = {
     footer: { rights: 'Tous droits réservés.', language: 'Langue' }
   },
   [Language.DE]: {
-    nav: { home: 'Startseite', features: 'Funktionen', about: 'Über uns', contact: 'Kontakt', progress: 'Fortschritt' },
+    nav: { home: 'Startseite', features: 'Funktionen', about: 'Über uns', contact: 'Kontakt', progress: 'Fortschritt', settings: 'Einstellungen' },
     hero: {
       title: 'Schneller und besser lesen',
       subtitle: 'Verbessern Sie Ihre Lesegeschwindigkeit und Ihr Gedächtnis mit diesen täglichen Übungen',

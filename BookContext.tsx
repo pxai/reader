@@ -52,72 +52,95 @@ export const BookProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const fetchBook = useCallback(async () => {
     let attempts = 0;
-    const MAX_ATTEMPTS = 10;
+    const MAX_ATTEMPTS = 5;
 
     while (attempts < MAX_ATTEMPTS) {
       attempts++;
-      // Random ID between 500 and 10000
-      const bookId = Math.floor(Math.random() * (10000 - 500 + 1)) + 500;
-      console.log(`[Attempt ${attempts}/${MAX_ATTEMPTS}] Fetching book ID: ${bookId}`);
-      const metadataUrl = `https://gutendex.com/books/${bookId}/`;
-      
       try {
-        // 1. Fetch Metadata
-        console.log('Fetching metadata:', metadataUrl);
-        const metadataResponse = await fetch(metadataUrl);
+        // 1. Get random page from Gutendex (1-200)
+        const randomPage = Math.floor(Math.random() * 200) + 1;
+        const listUrl = `https://gutendex.com/books/?page=${randomPage}`;
+        console.log(`[Attempt ${attempts}/${MAX_ATTEMPTS}] Fetching book list from page: ${randomPage}`);
+
+        const listRes = await fetch(listUrl);
+        if (!listRes.ok) throw new Error(`Failed to fetch book list: ${listRes.status}`);
         
-        if (metadataResponse.status === 404) {
-          console.warn(`Book ${bookId} not found (404), retrying...`);
-          continue;
-        }
+        const listData = await listRes.json();
+        if (!listData.results || listData.results.length === 0) continue;
+
+        // 2. Pick a random book from the page results
+        const randomBookIndex = Math.floor(Math.random() * listData.results.length);
+        const bookMetadata = listData.results[randomBookIndex];
         
-        if (!metadataResponse.ok) throw new Error('Failed to fetch book metadata');
-        
-        const metadata = await metadataResponse.json();
-        const textUrl = metadata.formats['text/plain; charset=us-ascii'] || metadata.formats['text/plain'];
-        console.log('Text URL found:', textUrl);
+        const textUrl = bookMetadata.formats['text/plain; charset=utf-8'] || bookMetadata.formats['text/plain'];
         
         if (!textUrl) {
-          console.warn(`Book ${bookId} has no plain text format, retrying...`);
+          console.warn(`Book "${bookMetadata.title}" has no text format, retrying...`);
           continue;
         }
 
-        // 2. Fetch the actual text content via proxy
-        console.log('Fetching text content via proxy...');
-        const proxiedUrl = `/api/proxy?url=${encodeURIComponent(textUrl)}`;
-        const textResponse = await fetch(proxiedUrl);
-        
-        if (!textResponse.ok) throw new Error(`Failed to fetch text content: ${textResponse.status} ${textResponse.statusText}`);
-        
-        const fullText = await textResponse.text();
-        console.log('Text content fetched, length:', fullText.length);
+        console.log(`Selected book: "${bookMetadata.title}" (ID: ${bookMetadata.id})`);
 
-        if (fullText.length < 100) {
-           console.warn(`Book ${bookId} text is too short, retrying...`);
-           continue;
+        // 3. Fetch text content via proxy
+        const proxiedUrl = `/api/proxy?url=${encodeURIComponent(textUrl)}`;
+        const textRes = await fetch(proxiedUrl);
+        
+        if (!textRes.ok) {
+          console.warn(`Failed to fetch text for book "${bookMetadata.title}", retrying...`);
+          continue;
         }
+
+        let fullText = await textRes.text();
+
+        // 4. Content cleaning (remove Gutenberg headers/footers)
+        const startMarker = fullText.indexOf("*** START");
+        const endMarker = fullText.indexOf("*** END");
         
-        // 3. Get first 50,000 characters
-        const slicedText = fullText.slice(0, 50000);
-        
-        // 4. Parse text
-        const segments = parseTextToSegments(slicedText);
+        if (startMarker !== -1 && endMarker !== -1) {
+          fullText = fullText.slice(startMarker, endMarker);
+        }
+
+        // 5. Cleanup whitespace and split into words
+        // We replace newlines with spaces to treat it as one continuous flow for now, 
+        // or keep paragraphs? The sample code does: text.replace(/\s+/g, " ").trim()
+        // which flattens everything into a single line of words.
+        const cleanText = fullText.replace(/\s+/g, " ").trim();
+        const words = cleanText.split(" ");
+        const TARGET_WORD_COUNT = 3000;
+
+        if (words.length <= TARGET_WORD_COUNT) {
+          console.warn(`Book "${bookMetadata.title}" is too short (${words.length} words), retrying...`);
+          continue;
+        }
+
+        // 6. Select a random slice of words
+        const maxStartIndex = words.length - TARGET_WORD_COUNT;
+        const startIndex = Math.floor(Math.random() * (maxStartIndex + 1));
+        const selectedWords = words.slice(startIndex, startIndex + TARGET_WORD_COUNT);
+        const finalText = selectedWords.join(" ");
+
+        console.log(`Processed ${selectedWords.length} words from "${bookMetadata.title}"`);
+
+        // 7. Return Book structure
+        // Since we flattened the text, we'll put it all in one paragraph segment for now.
+        // Or we could try to re-segment if we kept newlines.
+        // Given the sample code explicitly flattens, we will follow that.
+        const segments: Segment[] = [{ type: 'p', text: finalText }];
 
         return {
-          id: metadata.id.toString(),
-          title: metadata.title,
+          id: bookMetadata.id.toString(),
+          title: bookMetadata.title,
           segments,
-          totalWords: slicedText.trim().split(/\s+/).length
+          totalWords: selectedWords.length
         };
 
       } catch (error) {
-        console.error(`Error fetching book ${bookId}:`, error);
-        // If it's a network error (like proxy failure), we might want to keep trying or stop?
-        // We'll keep trying in case it was a specific glitch or bad book URL.
+        console.error('Error in fetchBook loop:', error);
+        // Continue to next attempt
       }
     }
-    
-    console.error('Failed to fetch any book after max attempts.');
+
+    console.error('Failed to fetch a valid book after max attempts.');
     return null;
   }, []);
 
@@ -125,15 +148,13 @@ export const BookProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     const fillQueue = async () => {
-      // If we already have a book, don't fetch more for this specific use case
-      // since we are always fetching the same book (ID 10000).
       if (isFetchingRef.current || bookQueue.length > 0) return;
 
       isFetchingRef.current = true;
       try {
         const newBook = await fetchBook();
         if (newBook) {
-          setBookQueue([newBook]); // Only keep one book since it's always the same
+          setBookQueue([newBook]);
         }
       } catch (error) {
         console.error('Failed to fill book queue:', error);
