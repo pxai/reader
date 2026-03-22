@@ -141,6 +141,10 @@ const TrainingView: React.FC = () => {
       layouts = [1, 1, 1, 3, 1, 1, 1]; // Exercise 5 layout: E C K LJC R U P
       if (level === '2') chars += '0123456789';
       if (level === '3') chars += 'abcdefghijklmnopqrstuvwxyz0123456789';
+    } else if (id === '6') {
+      layouts = [1, 1, 1, 1, 1, 1, 1, 1, 1]; // Exercise 6 layout: 9 characters spread
+      if (level === '2') chars += '0123456789';
+      if (level === '3') chars += 'abcdefghijklmnopqrstuvwxyz0123456789';
     }
 
     const result = [];
@@ -185,7 +189,7 @@ const TrainingView: React.FC = () => {
 
     if (nextLevel < 3) {
       nextPath = `/vision-span/exercise/${nextId}/level/${nextLevel + 1}`;
-    } else if (nextId < 5) {
+    } else if (nextId < 6) {
       nextPath = `/vision-span/exercise/${nextId + 1}/level/1`;
     }
 
@@ -298,7 +302,7 @@ const TrainingView: React.FC = () => {
               <ExerciseNavigation />
             </div>
           ) : flashMode > 0 ? (
-            <div className="flex flex-col items-center w-full max-w-2xl px-4 animate-in zoom-in duration-200 gap-8">
+            <div className={`flex flex-col items-center w-full ${id === '6' ? 'max-w-5xl' : 'max-w-2xl'} px-4 animate-in zoom-in duration-200 gap-8`}>
                {lines.slice(currentFlashIndex, currentFlashIndex + flashMode).map((line: any[], lineIdx: number) => (
                  <div key={lineIdx} className="flex justify-center w-full">
                     {line.map((item: any, iIdx: number) => (
@@ -318,7 +322,7 @@ const TrainingView: React.FC = () => {
             </div>
           ) : (
             lines.map((line, idx) => (
-              <div key={idx} className="flex justify-center w-full max-w-2xl px-4">
+              <div key={idx} className={`flex justify-center w-full ${id === '6' ? 'max-w-5xl' : 'max-w-2xl'} px-4`}>
                 {line.map((item: any, iIdx: number) => (
                   <span 
                     key={iIdx} 
@@ -347,8 +351,8 @@ const VisionSpanSelect: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto px-6 py-20 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <h2 className="text-4xl font-black text-slate-900 mb-12 text-center">Vision Span Exercises</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
-        {[1, 2, 3, 4, 5].map((num) => (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-8">
+        {[1, 2, 3, 4, 5, 6].map((num) => (
           <Link
             key={num}
             to={`/vision-span/exercise/${num}`}
